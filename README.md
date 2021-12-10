@@ -1,5 +1,5 @@
 # JCheck
-Randomized Property Testing for Julia
+*Randomized Property Based Testing for Julia*
 
 ## Example
 
@@ -21,16 +21,16 @@ end
 ```
 
 ## TODO
-- [] Better documentation
-- [] Support for special cases
-- [] More informative message for failing tests
-- [] Serialization of problematic cases
-- [] Shrinkage of failing test cases
-- [] More generators
-- [] Parallel testing
-- [] ...
+- [ ] Better documentation
+- [ ] Support for special cases
+- [ ] More informative message for failing tests
+- [ ] Serialization of problematic cases
+- [ ] Shrinkage of failing test cases
+- [ ] More generators
+- [ ] Parallel testing
+- [ ] ...
 
 ## Acknowledgements
-- [Randomized Property Test](https://git.sr.ht/~quf/RandomizedPropertyTest.jl): Inspiration for this package.
+- [Randomized Property Test](https://git.sr.ht/~quf/RandomizedPropertyTest.jl): inspiration for this package.
 - [Quickcheck](https://github.com/nick8325/quickcheck): OG random
-  properties testing.
+  property based testing.
