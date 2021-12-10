@@ -2,10 +2,9 @@ using Random: AbstractRNG, GLOBAL_RNG
 
 using Base: method_argnames
 
-import Test: Test, record, finish
-using Test: AbstractTestSet, Result, Pass, Fail, Error
-using Test: get_testset_depth, get_testset
 using Test: @test, @testset
+
+include("InternalTestSet.jl")
 
 ArgsDict = Dict{Symbol,
                 NamedTuple{(:type, :values),
@@ -130,7 +129,7 @@ macro quickcheck(qc)
     quote
         local _qc = $(esc(qc))
 
-        @testset "Test $desc" for (pred, desc, args) ∈ _qc.predicates
+        @testset InternalTestSet "Test $desc" for (pred, desc, args) ∈ _qc.predicates
             ## Flip to `false` if predicate evaluates to `false` for any
             ## valuation.
             local holds = true
@@ -140,6 +139,11 @@ macro quickcheck(qc)
                 pass = pred(valuation...)
 
                 if !pass
+                    ex = Expr(:tuple,
+                              (Expr(:(=), arg, val)
+                               for (arg, val) ∈ zip(args, valuation))...)
+                    @warn "Predicate \"$desc\" does not hold \
+                           for valuation $ex"
                     holds = false
                 end
             end
