@@ -23,7 +23,7 @@ end
 ## TODO
 - [ ] Better documentation
 - [ ] Support for special cases
-- [ ] More informative message for failing tests
+- [X] More informative message for failing tests
 - [ ] Serialization of problematic cases
 - [ ] Shrinkage of failing test cases
 - [ ] More generators
