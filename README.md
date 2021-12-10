@@ -4,7 +4,7 @@
 ## Example
 
 ``` julia
-using Test: @testset
+using Test: @testset, @test
 using JCheck
 
 qc = Quickcheck("A Test", n = 5)
