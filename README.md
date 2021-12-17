@@ -32,7 +32,8 @@ end
 └ @ Main ~/Projets/JCheck/src/TestSet.jl:155
 ┌ Warning: Predicate "Is odd" does not hold for valuation (n = -6574272390120163918,)
 └ @ Main ~/Projets/JCheck/src/TestSet.jl:155
-┌ Warning: Predicate "Sum commute" does not hold for valuation (n = 0, x = -Inf)└ @ Main ~/Projets/JCheck/src/TestSet.jl:155
+┌ Warning: Predicate "Sum commute" does not hold for valuation (n = 0, x = -Inf)
+└ @ Main ~/Projets/JCheck/src/TestSet.jl:155
 ┌ Warning: Predicate "Sum commute" does not hold for valuation (n = 0, x = Inf)
 └ @ Main ~/Projets/JCheck/src/TestSet.jl:155
 Test Summary:      | Pass  Fail  Total
