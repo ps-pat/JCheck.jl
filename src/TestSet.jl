@@ -136,8 +136,18 @@ macro quickcheck(qc)
             ## valuation.
             local holds = true
 
-            valuations = map(arg -> _qc.variables[arg].values, args)
-            for valuation ∈ zip(valuations...)
+            ## Special cases.
+            types = map(v -> _qc.variables[v].type, args)
+            specialcases_itr =
+                Iterators.product(specialcases.(types)...) |>
+                Iterators.flatten |>
+                itr -> Iterators.partition(itr, length(args))
+
+            ## Random cases.
+            randomcases = map(arg -> _qc.variables[arg].values, args)
+
+            for valuation ∈ Iterators.flatten([specialcases_itr,
+                                               zip(randomcases...)])
                 pass = pred(valuation...)
 
                 if !pass

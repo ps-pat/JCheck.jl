@@ -44,7 +44,7 @@ ERROR: Some tests did not pass: 3 passed, 1 failed, 0 errored, 0 broken.
 
 ## TODO
 - [ ] Better documentation
-- [ ] Support for special cases
+- [X] Support for special cases
 - [X] More informative message for failing tests
 - [ ] Serialization of problematic cases
 - [ ] Shrinkage of failing test cases
