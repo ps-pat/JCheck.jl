@@ -129,7 +129,9 @@ macro quickcheck(qc)
     quote
         local _qc = $(esc(qc))
 
-        @testset InternalTestSet "Test $desc" for (pred, desc, args) ∈ _qc.predicates
+        @testset InternalTestSet "Test $desc" for
+            (pred, desc, args) ∈ _qc.predicates
+
             ## Flip to `false` if predicate evaluates to `false` for any
             ## valuation.
             local holds = true
