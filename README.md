@@ -24,22 +24,23 @@ end
 ```
 
 ``` julia
-┌ Warning: Predicate "Is odd" does not hold for valuation (x = 0.02649402104579135,)
-└ @ Main ~/Projets/JCheck/src/TestSet.jl:145
-┌ Warning: Predicate "Is odd" does not hold for valuation (x = 0.1386790386668667,)
-└ @ Main ~/Projets/JCheck/src/TestSet.jl:145
-┌ Warning: Predicate "Is odd" does not hold for valuation (x = 0.3388381873521852,)
-└ @ Main ~/Projets/JCheck/src/TestSet.jl:145
-┌ Warning: Predicate "Is odd" does not hold for valuation (x = 0.025718876907983246,)
-└ @ Main ~/Projets/JCheck/src/TestSet.jl:145
-┌ Warning: Predicate "Is odd" does not hold for valuation (x = 0.538074498993818,)
-└ @ Main ~/Projets/JCheck/src/TestSet.jl:145
+┌ Warning: Predicate "Is odd" does not hold for valuation (n = 0,)
+└ @ Main ~/Projets/JCheck/src/TestSet.jl:155
+┌ Warning: Predicate "Is odd" does not hold for valuation (n = -9223372036854775808,)
+└ @ Main ~/Projets/JCheck/src/TestSet.jl:155
+┌ Warning: Predicate "Is odd" does not hold for valuation (n = -1194673449930948368,)
+└ @ Main ~/Projets/JCheck/src/TestSet.jl:155
+┌ Warning: Predicate "Is odd" does not hold for valuation (n = -6574272390120163918,)
+└ @ Main ~/Projets/JCheck/src/TestSet.jl:155
+┌ Warning: Predicate "Sum commute" does not hold for valuation (n = 0, x = -Inf)└ @ Main ~/Projets/JCheck/src/TestSet.jl:155
+┌ Warning: Predicate "Sum commute" does not hold for valuation (n = 0, x = Inf)
+└ @ Main ~/Projets/JCheck/src/TestSet.jl:155
 Test Summary:      | Pass  Fail  Total
-Sample Test Set    |    3     1      4
+Sample Test Set    |    2     2      4
   Test Identity    |    1            1
   Test Is odd      |          1      1
-  Test Sum commute |    1            1
-ERROR: Some tests did not pass: 3 passed, 1 failed, 0 errored, 0 broken.
+  Test Sum commute |          1      1
+ERROR: Some tests did not pass: 2 passed, 2 failed, 0 errored, 0 broken.
 ```
 
 ## TODO

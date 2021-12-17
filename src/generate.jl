@@ -1,4 +1,7 @@
-using Random: AbstractRNG, GLOBAL_RNG
+using Random:
+    AbstractRNG,
+    GLOBAL_RNG,
+    bitrand
 
 generate(::Type{T}) where T = generate(GLOBAL_RNG, T)
 
@@ -17,4 +20,15 @@ SampleableReal = Union{AbstractFloat,
 ## Real numbers.
 generate(rng::AbstractRNG, ::Type{T}) where T <: SampleableReal = rand(T)
 
-specialcases(::Type{T}) where T <: SampleableReal = [zero(T), one(T)]
+for (type, size) ∈ Dict(Float16 => 16, Float32 => 32, Float64 => 64)
+    @eval begin
+        function generate(rng::AbstractRNG, ::Type{$type})
+            first(reinterpret($type, bitrand($size).chunks))
+        end
+    end
+end
+
+specialcases(::Type{T}) where T <: SampleableReal = [zero(T),
+                                                     one(T),
+                                                     typemin(T),
+                                                     typemax(T)]
