@@ -4,6 +4,10 @@ using Base: method_argnames
 
 using Test: @test, @testset
 
+import JLSO
+
+import Dates
+
 include("InternalTestSet.jl")
 
 ArgsDict = Dict{Symbol,
@@ -25,12 +29,16 @@ struct Quickcheck <: AbstractTestSet
 
     ## Number of random inputs to generate.
     n::Int
+
+    ## Should failing inputs be serialized?
+    serialize_fails::Bool
 end
 
 function Quickcheck(desc::AbstractString;
                     rng::AbstractRNG = GLOBAL_RNG,
-                    n::Int = 100)
-    Quickcheck(rng, PredsAssoc(), ArgsDict(), n)
+                    n::Int = 100,
+                    serialize_fails = true)
+    Quickcheck(rng, PredsAssoc(), ArgsDict(), n, serialize_fails)
 end
 
 macro add_variables(qc, vardec...)
@@ -129,6 +137,15 @@ macro quickcheck(qc)
     quote
         local _qc = $(esc(qc))
 
+        ## Stores failed cases. The key is the test predicate's
+        ## description (as a symbol). The value is a named tuple
+        ## containing the actual predicate (predicate) and a vector of
+        ## inputs for which the predicate evaluated to `false`
+        ## (valuation).
+        local failed = Dict{Symbol,
+                            NamedTuple{(:predicate, :valuations),
+                                       Tuple{Function, Vector{Tuple}}}}()
+
         @testset InternalTestSet "Test $desc" for
             (pred, desc, args) ∈ _qc.predicates
 
@@ -141,7 +158,8 @@ macro quickcheck(qc)
             specialcases_itr =
                 Iterators.product(specialcases.(types)...) |>
                 Iterators.flatten |>
-                itr -> Iterators.partition(itr, length(args))
+                itr -> Iterators.partition(itr, length(args)) |>
+                itr -> Iterators.map(Tuple, itr)
 
             ## Random cases.
             randomcases = map(arg -> _qc.variables[arg].values, args)
@@ -156,11 +174,45 @@ macro quickcheck(qc)
                                for (arg, val) ∈ zip(args, valuation))...)
                     @warn "Predicate \"$desc\" does not hold \
                            for valuation $ex"
+
+                    if _qc.serialize_fails
+                        if !haskey(failed, Symbol(desc))
+                            failed[Symbol(desc)] = (predicate = pred,
+                                                    valuations = Tuple[])
+                        end
+
+                        push!(failed[Symbol(desc)].valuations, valuation)
+                    end
+
                     holds = false
                 end
             end
             @test holds
         end
+
+        if _qc.serialize_fails
+            filename = "JCheck_" * Dates.format(Dates.now(),
+                                                "yyyy-mm-dd_HH-MM-SS")
+
+            ## Make sure that no 2 files with the same name are
+            ## created. Most likely useless except for people with
+            ## nothing better to do trying to break shit.
+            if ispath(filename * ".jlso")
+                filename *= "--1"
+            end
+
+            while ispath(filename * ".jlso")
+                ## 29 (28) works because the part of the name up to
+                ## the index has a fixed width. Please don't fuck it
+                ## up.
+                idx = parse(Int, filename[29:end]) + 1
+
+                filename = filename[1:28] * string(idx)
+            end
+
+            JLSO.save(filename, failed)
+        end
+
         nothing
     end
 end
