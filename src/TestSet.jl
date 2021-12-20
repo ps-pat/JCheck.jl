@@ -190,7 +190,7 @@ macro quickcheck(qc)
             @test holds
         end
 
-        if _qc.serialize_fails
+        if !isempty(failed) && _qc.serialize_fails
             filename = "JCheck_" * Dates.format(Dates.now(),
                                                 "yyyy-mm-dd_HH-MM-SS")
             fileextension = ".jchk"
@@ -212,6 +212,23 @@ macro quickcheck(qc)
             end
 
             JLSO.save(filename * fileextension, failed)
+
+            ## Warn the user that some predicates do not hold.
+            message_color = Base.warn_color()
+
+            println()
+            printstyled("Some predicates do not hold for some valuations; \
+                         they have been saved to \
+                         $(filename * fileextension). Use function ",
+                        color = message_color)
+            printstyled("load", color = message_color, underline = true)
+            printstyled(" and macro ", color = message_color)
+            printstyled("@getcases",
+                        color = message_color,
+                        underline = true)
+            printstyled(" to explore the problematic cases.",
+                        color = message_color)
+            println("\n")
         end
 
         nothing

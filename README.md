@@ -36,6 +36,9 @@ end
 └ @ Main ~/Projets/JCheck/src/TestSet.jl:155
 ┌ Warning: Predicate "Sum commute" does not hold for valuation (n = 0, x = Inf)
 └ @ Main ~/Projets/JCheck/src/TestSet.jl:155
+
+Some predicates do not hold for some valuations; they have been saved to JCheck_<date>.jchk. Use function load and macro @getcases to explore the problematic cases.
+
 Test Summary:      | Pass  Fail  Total
 Sample Test Set    |    2     2      4
   Test Identity    |    1            1
@@ -48,7 +51,7 @@ ERROR: Some tests did not pass: 2 passed, 2 failed, 0 errored, 0 broken.
 - [ ] Better documentation
 - [X] Support for special cases
 - [X] More informative message for failing tests
-- [ ] Serialization of problematic cases
+- [X] Serialization of problematic cases
 - [ ] Shrinkage of failing test cases
 - [ ] More generators
 - [ ] Parallel testing
