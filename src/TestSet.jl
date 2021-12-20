@@ -49,8 +49,8 @@ macro add_variables(qc, vardec...)
     _qc = esc(qc)
 
     for declaration in vardec
-        ## `type` must be an expression (type `Expr`) of the form
-        ## `x::Type` where `x` is a `Symbol` and `Type` is a
+        ## `declaration` must be an expression (type `Expr`) of the
+        ## form `x::Type` where `x` is a `Symbol` and `Type` is a
         ## `DataType`.
         declaration isa Expr &&
             declaration.head == :(::) &&
@@ -59,7 +59,7 @@ macro add_variables(qc, vardec...)
             error("Invalid variable declaration $declaration")
 
         varname = Ref(first(declaration.args))
-        vartype = last(declaration.args)
+        vartype = esc(last(declaration.args))
 
         ## Add variables to the test set.
         push!(ret, quote
