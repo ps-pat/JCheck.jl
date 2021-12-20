@@ -57,7 +57,9 @@ JCheck.FailedTests with 2 entries:
   Symbol("Is odd")      => NamedTuple{(:predicate, :valuations), Tuple{Function…
 
 julia> pred, valuations = @getcases ft Sum
-NamedTuple{(:predicate, :valuations), Tuple{Function, Vector{Tuple}}}((Serialization.__deserialized_types__.var"##274"(), Tuple[(0, -Inf), (0, Inf)]))
+NamedTuple{(:predicate, :valuations), Tuple{Function, Vector{Tuple}}}
+    ((Serialization.__deserialized_types__.var"##274"(), Tuple[(0, -Inf),
+    (0, Inf)]))
 
 julia> valuations
 2-element Vector{Tuple}:
@@ -66,7 +68,6 @@ julia> valuations
 
 julia> pred(first(valuations)...)
 false
-
 ```
 
 
