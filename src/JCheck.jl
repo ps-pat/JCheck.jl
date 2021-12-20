@@ -13,4 +13,10 @@ export @add_variables
 export @add_predicate
 export @quickcheck
 
+include("FailedTests.jl")
+
+export load
+
+export @getcases
+
 end
