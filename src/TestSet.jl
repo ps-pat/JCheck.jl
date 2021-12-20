@@ -193,15 +193,16 @@ macro quickcheck(qc)
         if _qc.serialize_fails
             filename = "JCheck_" * Dates.format(Dates.now(),
                                                 "yyyy-mm-dd_HH-MM-SS")
+            fileextension = ".jchk"
 
             ## Make sure that no 2 files with the same name are
             ## created. Most likely useless except for people with
             ## nothing better to do trying to break shit.
-            if ispath(filename * ".jlso")
+            if ispath(filename * fileextension)
                 filename *= "--1"
             end
 
-            while ispath(filename * ".jlso")
+            while ispath(filename * fileextension)
                 ## 29 (28) works because the part of the name up to
                 ## the index has a fixed width. Please don't fuck it
                 ## up.
@@ -210,7 +211,7 @@ macro quickcheck(qc)
                 filename = filename[1:28] * string(idx)
             end
 
-            JLSO.save(filename, failed)
+            JLSO.save(filename * fileextension, failed)
         end
 
         nothing
