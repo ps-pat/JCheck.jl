@@ -3,6 +3,7 @@
 
 ## Example
 
+## Testing properties.
 ``` julia
 using Test: @testset, @test
 using JCheck
@@ -47,6 +48,27 @@ Sample Test Set    |    2     2      4
   Test Sum commute |          1      1
 ERROR: Some tests did not pass: 2 passed, 2 failed, 0 errored, 0 broken.
 ```
+
+### Analyzing problematic cases.
+``` julia
+julia> ft = JCheck.load("JCheck_test.jchk")
+JCheck.FailedTests with 2 entries:
+  Symbol("Sum commute") => NamedTuple{(:predicate, :valuations), Tuple{Function…
+  Symbol("Is odd")      => NamedTuple{(:predicate, :valuations), Tuple{Function…
+
+julia> pred, valuations = @getcases ft Sum
+NamedTuple{(:predicate, :valuations), Tuple{Function, Vector{Tuple}}}((Serialization.__deserialized_types__.var"##274"(), Tuple[(0, -Inf), (0, Inf)]))
+
+julia> valuations
+2-element Vector{Tuple}:
+ (0, -Inf)
+ (0, Inf)
+
+julia> pred(first(valuations)...)
+false
+
+```
+
 
 ## TODO
 - [ ] Better documentation
