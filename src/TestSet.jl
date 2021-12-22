@@ -18,6 +18,8 @@ PredsAssoc = Vector{NamedTuple{(:pred, :desc, :args),
                                Tuple{Function, String, Vector{Symbol}}}}
 
 struct Quickcheck <: AbstractTestSet
+    description::AbstractString
+
     ## PRNG used to generate inputs.
     rng::AbstractRNG
 
@@ -38,7 +40,7 @@ function Quickcheck(desc::AbstractString;
                     rng::AbstractRNG = GLOBAL_RNG,
                     n::Int = 100,
                     serialize_fails = true)
-    Quickcheck(rng, PredsAssoc(), ArgsDict(), n, serialize_fails)
+    Quickcheck(desc, rng, PredsAssoc(), ArgsDict(), n, serialize_fails)
 end
 
 macro add_variables(qc, vardec...)
@@ -119,7 +121,7 @@ macro add_predicate(qc, desc, pred)
 end
 
 function Base.show(io::IO, qc::Quickcheck)
-    header = "Test set with $(length(qc.predicates)) predicates \
+    header = "$(qc.description): $(length(qc.predicates)) predicates \
               and $(length(qc.variables)) free variables:"
 
     vars = String[]
