@@ -88,36 +88,46 @@ macro add_variables(qc, vardec...)
     Expr(:block, ret...)
 end
 
-function add_predicate(qc::Quickcheck, desc::AbstractString, pred::Function)
-    for method ∈ methods(pred)
-        method.nargs < 2 && continue
+function add_predicate(qc::Quickcheck,
+                       desc::AbstractString,
+                       args::Vector{Symbol},
+                       types::Vector{DataType},
+                       pred::Function)
 
-        args = method_argnames(method)[2:end]
-        types = method.sig.parameters[2:end]
+    ## Make sure that suitable variables are available in qc.
+    for (arg, type) ∈ Iterators.zip(args, types)
+        haskey(qc.variables, arg) ||
+            error("No type declaration for variable $arg available in $qc")
 
-        ismatch = true
-        for (arg, type) ∈ zip(args, types)
-            if !haskey(qc.variables, arg)
-                ismatch = false
-                break
-            elseif !(qc.variables[arg].type <: type)
-                ismatch = false
-                break
-            end
-        end
-
-        if ismatch
-            push!(qc.predicates, (pred = pred, desc = desc, args = args))
-            return qc
-        end
+        qc.variables[arg].type === type ||
+            error("A declaration for variable $arg exists, but has the \
+                   wrong type; please choose another name for $arg")
     end
 
-    error("No method of \"$desc\" has a signature matching a subset \
-           of variables declared in test set")
+    push!(qc.predicates, (pred = pred, desc = desc, args = [args...]))
+
+    qc
 end
 
 macro add_predicate(qc, desc, pred)
-    :(add_predicate($(esc(qc)), $desc, $(esc(pred))))
+    pred.head === :(->) || error("Invalid predicate")
+
+    ## Manage differences between unary and non unary predicates.
+    local pred_arguments::Vector{Expr} =
+        first(pred.args).head === :tuple ?
+        first(pred.args).args : [first(pred.args)]
+
+    local args, types = pred_arguments |>
+        args -> Iterators.map(e -> [first(e.args), last(e.args)], args) |>
+        it -> Iterators.zip(it...)
+
+    local _types = esc(Expr(:tuple, types...))
+
+    :(add_predicate($(esc(qc)),
+                    $desc,
+                    [$args...],
+                    [$_types...],
+                    $(esc(pred))))
 end
 
 function Base.show(io::IO, qc::Quickcheck)
