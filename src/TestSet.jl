@@ -52,10 +52,7 @@ macro add_variables(qc, vardec...)
         ## `declaration` must be an expression (type `Expr`) of the
         ## form `x::Type` where `x` is a `Symbol` and `Type` is a
         ## `DataType`.
-        declaration isa Expr &&
-            declaration.head == :(::) &&
-            first(declaration.args) isa Symbol &&
-            eval(last(declaration.args)) isa DataType ||
+        declaration isa Expr && declaration.head == :(::) ||
             error("Invalid variable declaration $declaration")
 
         varname = Ref(first(declaration.args))
