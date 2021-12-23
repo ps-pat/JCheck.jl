@@ -13,9 +13,9 @@ rng = Xoshiro(42)
 
 qc = Quickcheck("A Test", n = 5, rng = rng)
 @add_variables qc x::Float64 n::Int
-@add_predicate qc "Identity" (x -> x == x)
-@add_predicate qc "Is odd" isodd
-@add_predicate qc "Sum commute" ((n, x) -> n * x == x * n)
+@add_predicate qc "Identity" (x::Float64 -> x == x)
+@add_predicate qc "Is odd" (n::Int -> isodd(n))
+@add_predicate qc "Sum commute" ((n::Int, x::Float64) -> n * x == x * n)
 
 @testset "Sample Test Set" begin
     @test isempty([])
