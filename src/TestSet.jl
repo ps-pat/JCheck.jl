@@ -43,65 +43,25 @@ function Quickcheck(desc::AbstractString;
     Quickcheck(desc, rng, PredsAssoc(), ArgsDict(), n, serialize_fails)
 end
 
-macro add_variables(qc, vardec...)
-    ## Expressions that are to be returned by the macro.
-    ret = Expr[]
-
-    ## Name of the TestSet.
-    _qc = esc(qc)
-
-    for declaration in vardec
-        ## `declaration` must be an expression (type `Expr`) of the
-        ## form `x::Type` where `x` is a `Symbol` and `Type` is a
-        ## `DataType`.
-        declaration isa Expr && declaration.head == :(::) ||
-            error("Invalid variable declaration $declaration")
-
-        varname = Ref(first(declaration.args))
-        vartype = esc(last(declaration.args))
-
-        ## Add variables to the test set.
-        push!(ret, quote
-                  _varname = $varname[]
-                  _vartype = $vartype
-
-                  ## If a variable has already been declared, make
-                  ## sure that it has the same type.
-                  if haskey($_qc.variables, _varname)
-                      previous_vartype =
-                          $_qc.variables[_varname].type
-
-                      _vartype === previous_vartype ||
-                          error("$_varname has already been declared \
-                                     with type $previous_vartype")
-                  else
-                      $_qc.variables[_varname] =
-                          (type = _vartype,
-                           values = [generate($_qc.rng, _vartype)
-                                     for _ ∈ range(1, length = $_qc.n)])
-                  end
-
-                  $_qc
-              end)
-    end
-
-    Expr(:block, ret...)
-end
-
 function add_predicate(qc::Quickcheck,
                        desc::AbstractString,
                        args::Vector{Symbol},
                        types::Vector{DataType},
                        pred::Function)
-
-    ## Make sure that suitable variables are available in qc.
     for (arg, type) ∈ Iterators.zip(args, types)
-        haskey(qc.variables, arg) ||
-            error("No type declaration for variable $arg available in $qc")
+        ## Make sure that suitable variables are available in `qc`. If
+        ## `arg` is not present already, simply add it. Otherwise, we
+        ## make sure types are the same.
+        oldtype_pair = get!(qc.variables, arg) do
+            values = [generate(qc.rng, type)
+                      for _ ∈ range(1, length = qc.n)]
+            (type = type, values = values)
+        end
 
-        qc.variables[arg].type === type ||
-            error("A declaration for variable $arg exists, but has the \
-                   wrong type; please choose another name for $arg")
+        oldtype_pair.type === type && continue
+
+        error("A declaration for variable $arg already exists with type \
+               $(oldtype_pair.type); please choose another name for $arg")
     end
 
     push!(qc.predicates, (pred = pred, desc = desc, args = [args...]))
@@ -110,24 +70,48 @@ function add_predicate(qc::Quickcheck,
 end
 
 macro add_predicate(qc, desc, pred)
-    pred.head === :(->) || error("Invalid predicate")
+    ## Perform a bunch of checks.
+    pred.head === :(->) || error("Predicate declaration must have the form
+                                  of an anonymous function (... -> ...)")
+
+    local declarations = first(pred.args)
+
+    declarations isa Expr ||
+        error("A type must be specified for free variable $declarations")
+
+    declarations.head ∈ [:(::), :tuple] ||
+        error("The rhs of the predicate must either be a single variable \
+               of a tuple of variables.")
+
+    if declarations.head === :tuple
+        for declaration ∈ declarations.args
+            declaration isa Expr ||
+                error("A type must be specified for free variable \
+                       $declaration")
+        end
+    end
 
     ## Manage differences between unary and non unary predicates.
     local pred_arguments::Vector{Expr} =
-        first(pred.args).head === :tuple ?
-        first(pred.args).args : [first(pred.args)]
+        declarations.head === :tuple ?
+        declarations.args : [declarations]
 
-    local args, types = pred_arguments |>
-        args -> Iterators.map(e -> [first(e.args), last(e.args)], args) |>
-        it -> Iterators.zip(it...)
-
-    local _types = esc(Expr(:tuple, types...))
+    local args, types = destructure_declaration(pred_arguments)
 
     :(add_predicate($(esc(qc)),
                     $desc,
                     [$args...],
-                    [$_types...],
+                    [$types...],
                     $(esc(pred))))
+end
+
+function destructure_declaration(vardec::Union{Vector{Expr},
+                                               Tuple{Vararg{Expr}}})
+    args, types = vardec |>
+        args -> Iterators.map(e -> [first(e.args), last(e.args)], args) |>
+        it -> Iterators.zip(it...)
+
+    args, esc(Expr(:tuple, types...))
 end
 
 function Base.show(io::IO, qc::Quickcheck)

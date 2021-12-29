@@ -9,7 +9,6 @@ include("TestSet.jl")
 
 export Quickcheck
 
-export @add_variables
 export @add_predicate
 export @quickcheck
 
