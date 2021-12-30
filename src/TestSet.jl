@@ -48,6 +48,13 @@ function add_predicate(qc::Quickcheck,
                        args::Vector{Symbol},
                        types::Vector{DataType},
                        pred::Function)
+    ## Make sure that no predicate with the same description exists in
+    ## `qc`.
+    for (_, olddesc, _) ∈ qc.predicates
+        olddesc === desc &&
+            error("A predicate with the same description already exists")
+    end
+
     for (arg, type) ∈ Iterators.zip(args, types)
         ## Make sure that suitable variables are available in `qc`. If
         ## `arg` is not present already, simply add it. Otherwise, we
