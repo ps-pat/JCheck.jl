@@ -71,23 +71,29 @@ end
 
 macro add_predicate(qc, desc, pred)
     ## Perform a bunch of checks.
-    pred.head === :(->) || error("Predicate declaration must have the form
-                                  of an anonymous function (... -> ...)")
+    pred.head === :(->) ||
+        return :(error("Predicate declaration must have the form of an \
+                        anonymous function (... -> ...)"))
 
     local declarations = first(pred.args)
 
-    declarations isa Expr ||
-        error("A type must be specified for free variable $declarations")
+    if !(declarations isa Expr)
+        var = Meta.quot(declarations)
+        return :(error("A type must be specified for free variable \
+                        $($var)"))
+    end
 
     declarations.head ∈ [:(::), :tuple] ||
-        error("The rhs of the predicate must either be a single variable \
-               of a tuple of variables.")
+        return :(error("The rhs of the predicate must either be a single \
+                        variable of a tuple of variables."))
 
     if declarations.head === :tuple
         for declaration ∈ declarations.args
-            declaration isa Expr ||
-                error("A type must be specified for free variable \
-                       $declaration")
+            if !(declaration isa Expr)
+                var = Meta.quot(declaration)
+                return :(error("A type must be specified for free \
+                                variable $($var)"))
+            end
         end
     end
 
