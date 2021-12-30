@@ -25,7 +25,8 @@ jobs:
       - uses: julia-actions/julia-runtest@v1
       - uses: julia-actions/julia-processcoverage@v1
         with:
-          directories: src
+          directories: src,test
       - uses: codecov/codecov-action@v2
         with:
           files: lcov.info
+          token: eca6618d-1d8e-4f27-bd72-d9942ea6b6f6
