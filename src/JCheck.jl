@@ -5,7 +5,7 @@ include("generate.jl")
 export generate
 export specialcases
 
-include("TestSet.jl")
+include("Quickcheck.jl")
 
 export Quickcheck
 

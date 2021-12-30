@@ -5,6 +5,6 @@ using Test
 
 @time begin
     @testset "JCheck's tests" begin
-        include("TestSet.jl")
+        include("Quickcheck.jl")
     end
 end
