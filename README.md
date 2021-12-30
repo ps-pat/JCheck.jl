@@ -1,3 +1,5 @@
+[![Tests](https://github.com/ps-pat/JCheck.jl/actions/workflows/test.yml/badge.svg)](https://github.com/ps-pat/JCheck.jl/actions/workflows/test.yml)
+
 # JCheck
 *Randomized Property Based Testing for Julia*
 
