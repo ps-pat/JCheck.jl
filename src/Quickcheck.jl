@@ -16,7 +16,20 @@ ArgsDict = Dict{Symbol,
 
 PredsAssoc = Vector{NamedTuple{(:pred, :desc, :args),
                                Tuple{Function, String, Vector{Symbol}}}}
+"""
+    Quickcheck
 
+Contain a set of property to check through the generation of random input.
+
+# Fields
+
+- `description::AbstractString`: description for the instance.
+- `rng::AbstractRNG`: PRNG used to generate inputs.
+- `predicates::PredsAssoc`: predicates to check.
+- `variables::ArgsDict`: Arguments used by the predicates.
+- `n::Int`: Number of random inputs to generate.
+- `serialize_fails::Bool`: If true, serialize failing inputs to a JLSO file.
+"""
 struct Quickcheck
     description::AbstractString
 
@@ -36,6 +49,24 @@ struct Quickcheck
     serialize_fails::Bool
 end
 
+"""
+    Quickcheck(desc; rng=GLOBAL_RNG, n=100, serialize_fails=true)
+
+Constructor for type [`Quickcheck`](@ref).
+
+# Arguments
+
+- `desc::AbstractString`: description for the instance.
+- `rng::AbstractRNG`: PRNG used to generate inputs.
+- `n::Int`: Number of random inputs to generate.
+- `serialize_fails::Bool`: If true, serialize failing inputs to a JLSO file.
+
+# Examples
+```jldoctest
+julia> qc = Quickcheck("A Test")
+A Test: 0 predicates and 0 free variables:
+```
+"""
 function Quickcheck(desc::AbstractString;
                     rng::AbstractRNG = GLOBAL_RNG,
                     n::Int = 100,
@@ -237,6 +268,11 @@ function quickcheck(qc::Quickcheck)
     nothing
 end
 
+"""
+    @quickcheck qc
+
+Check the properties specified in object `qc` of type [`Quickcheck`](@ref).
+"""
 macro quickcheck(qc)
     _qc = esc(qc)
     :(quickcheck($_qc))
