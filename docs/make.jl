@@ -12,4 +12,5 @@ makedocs(sitename="JCheck.jl",
          modules = [JCheck])
 
 deploydocs(
-    repo = "github.com/ps-pat/JCheck.jl.git")
+    repo = "github.com/ps-pat/JCheck.jl.git",
+    devbranch = "main")
