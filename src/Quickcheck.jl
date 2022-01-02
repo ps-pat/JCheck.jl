@@ -17,7 +17,7 @@ ArgsDict = Dict{Symbol,
 PredsAssoc = Vector{NamedTuple{(:pred, :desc, :args),
                                Tuple{Function, String, Vector{Symbol}}}}
 
-struct Quickcheck <: AbstractTestSet
+struct Quickcheck
     description::AbstractString
 
     ## PRNG used to generate inputs.
