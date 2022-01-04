@@ -64,7 +64,7 @@ Constructor for type [`Quickcheck`](@ref).
 # Examples
 ```jldoctest
 julia> qc = Quickcheck("A Test")
-A Test: 0 predicates and 0 free variables:
+A Test: 0 predicate and 0 free variable.
 ```
 """
 function Quickcheck(desc::AbstractString;
@@ -159,8 +159,19 @@ function destructure_declaration(vardec::Union{Vector{Expr},
 end
 
 function Base.show(io::IO, qc::Quickcheck)
-    header = "$(qc.description): $(length(qc.predicates)) predicates \
-              and $(length(qc.variables)) free variables:"
+    nbpredicates = length(qc.predicates)
+    nbvariables = length(qc.variables)
+
+    predicate_string = "predicate" * (nbpredicates < 2 ? "" : 's')
+    variable_string = "variable" * (nbvariables < 2 ? '.' : "s:")
+
+    header = "$(qc.description): $nbpredicates $predicate_string and \
+              $nbvariables free $variable_string"
+
+    if isempty(qc.variables)
+        print(header)
+        return
+    end
 
     vars = String[]
     for (variable, entry) ∈ pairs(qc.variables)
