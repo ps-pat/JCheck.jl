@@ -81,7 +81,7 @@ false
 
 ## Acknowledgements
 - [Randomized Property Test](https://git.sr.ht/~quf/RandomizedPropertyTest.jl): inspiration for this package.
-- [Quickcheck](https://github.com/nick8325/quickcheck): OG random
+- [QuickCheck](https://github.com/nick8325/quickcheck): OG random
   property based testing.
 - [JLSO](https://github.com/invenia/JLSO.jl): Used for containing
   serialized test objects.
