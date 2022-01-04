@@ -169,7 +169,7 @@ function Base.show(io::IO, qc::Quickcheck)
               $nbvariables free $variable_string"
 
     if isempty(qc.variables)
-        print(header)
+        print(io, header)
         return
     end
 
@@ -178,7 +178,7 @@ function Base.show(io::IO, qc::Quickcheck)
         push!(vars, string(variable) * "::" * string(entry.type))
     end
 
-    print(header, "\n", join(vars, "\n"))
+    print(io, header, "\n", join(vars, "\n"))
 end
 
 function quickcheck(qc::Quickcheck)
