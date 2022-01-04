@@ -1,5 +1,6 @@
 [![Tests](https://github.com/ps-pat/JCheck.jl/actions/workflows/test.yml/badge.svg)](https://github.com/ps-pat/JCheck.jl/actions/workflows/test.yml)
 [![Codecov](https://codecov.io/gh/ps-pat/JCheck.jl/branch/main/graph/badge.svg?token=UF41E6AO1S)](https://codecov.io/gh/ps-pat/JCheck.jl)
+[![Documentation](https://img.shields.io/badge/Doc-Stable-success)](https://patrickfournier.ca/JCheck.jl/dev/)
 
 # JCheck
 *Randomized Property Based Testing for Julia*
