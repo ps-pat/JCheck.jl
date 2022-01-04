@@ -9,7 +9,9 @@ DocMeta.setdocmeta!(JCheck,
 
 makedocs(sitename="JCheck.jl",
          doctest = true,
-         modules = [JCheck])
+         modules = [JCheck],
+         pages = ["Home" => "index.md",
+                  "Reference" => "reference.md"])
 
 deploydocs(
     repo = "github.com/ps-pat/JCheck.jl.git",
