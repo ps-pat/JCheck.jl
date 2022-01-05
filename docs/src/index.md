@@ -63,8 +63,11 @@ please read the documentation of [`@add_predicate`](@ref).
 The macro [`@quickcheck`](@ref) launch the process of looking for
 falsifying instances in a [`Quickcheck`](@ref) object.
 
-``` @example example_index
+``` @jldoctest
 @quickcheck qc
+
+Test Summary:    | Pass  Total
+Test Sum commute |    1      1
 ```
 
 #### As part of a [`@testset`](https://docs.julialang.org/en/v1/stdlib/Test/#Test.@testset)
@@ -72,13 +75,15 @@ The [`@quickcheck`](@ref) macro can be nested inside
 [`@testset`](https://docs.julialang.org/en/v1/stdlib/Test/#Test.@testset).
 This allows easy integration to a package's set of tests.
 
-``` @example example_index
+``` @jldoctest
 @testset "Sample test set" begin
     @test isempty([])
 
     @quickcheck qc
 end
-nothing #hide
+
+Test Summary:   | Pass  Total
+Sample test set |    2      2
 ```
 
 Let's add a failing predicate.
