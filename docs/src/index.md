@@ -60,7 +60,7 @@ the context of `JCheck` the form of the predicate is very strict;
 please read the documentation of [`@add_predicate`](@ref).
 
 ### (Quick)checking
-The macro [`@quickcheck`](@ref) launch the process of looking for
+The macro [`@quickcheck`](@ref) launches the process of looking for
 falsifying instances in a [`Quickcheck`](@ref) object.
 
 ``` @jldoctest
