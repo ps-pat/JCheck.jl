@@ -15,8 +15,8 @@ Quickcheck(::AbstractString)
 
 ## Failed Cases Analysis
 
-load(::Union{IO, AbstractString, AbstractPath})
 ``` @docs
 FailedTests
+load(::Union{IO, AbstractString, AbstractPath})
 @getcases(::Any, ::Any...)
 ```

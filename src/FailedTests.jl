@@ -27,8 +27,16 @@ end
     load(io)
 
 Load a collection of failed test cases serialized by a
-[`@quickcheck`](@ref) run. Argument `io` can be of type `IO`,
-`AbstractString` or `AbstractPath`.
+[`@quickcheck`](@ref) run.
+ Argument `io` can be of type `IO`, `AbstractString` or `AbstractPath`.
+
+# Examples
+```jldoctest
+julia> ft = JCheck.load("JCheck_test.jchk")
+2 failing predicates:
+Product commute
+Is odd
+```
 """
 load(io::Union{IO, AbstractString, AbstractPath}) =
     FailedTests(JLSO.load(io))
@@ -76,9 +84,9 @@ end
 function show(io::IO, ::MIME"text/plain", ft::FailedTests)
     nbfailed = length(ft)
 
-    print(io, "$nbfailed failing predicate", nbfailed > 1 ? "s" : "", ":\n")
+    header = "$nbfailed failing predicate" *
+        (nbfailed > 1 ? "s" : "") *
+        ":\n"
 
-    for key ∈ keys(ft)
-        println(key)
-    end
+    print(io, header * join(String.(keys(ft)), "\n"))
 end
