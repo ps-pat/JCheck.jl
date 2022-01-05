@@ -330,6 +330,10 @@ end
     @quickcheck qc
 
 Check the properties specified in object `qc` of type [`Quickcheck`](@ref).
+
+If `qc.serialize_fails` is `true`, serialize the failing cases to
+`JCheck_yyyy-mm-dd_HH-MM-SS.jchk`. Those can latter be analyzed using
+[`load`](@ref) and [`@getcases`](@ref).
 """
 macro quickcheck(qc)
     _qc = esc(qc)
