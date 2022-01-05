@@ -228,7 +228,7 @@ function Base.show(io::IO, qc::Quickcheck)
     print(io, header, "\n", join(vars, "\n"))
 end
 
-function quickcheck(qc::Quickcheck)
+function quickcheck(qc::Quickcheck, file_id::AbstractString)
     ## Stores failed cases. The key is the test predicate's
     ## description (as a symbol). The value is a named tuple
     ## containing the actual predicate (predicate) and a vector of
@@ -283,8 +283,7 @@ function quickcheck(qc::Quickcheck)
     end
 
     if !isempty(failed) && qc.serialize_fails
-        filename = "JCheck_" * Dates.format(Dates.now(),
-                                            "yyyy-mm-dd_HH-MM-SS")
+        filename = "JCheck_" * file_id
         fileextension = ".jchk"
 
         ## Make sure that no 2 files with the same name are
@@ -295,12 +294,11 @@ function quickcheck(qc::Quickcheck)
         end
 
         while ispath(filename * fileextension)
-            ## 29 (28) works because the part of the name up to
-            ## the index has a fixed width. Please don't fuck it
-            ## up.
-            idx = parse(Int, filename[29:end]) + 1
+            id_start = last(findfirst("--", filename)) + one(Int)
 
-            filename = filename[1:28] * string(idx)
+            idx = parse(Int, filename[id_start:end]) + 1
+
+            filename = filename[begin:(id_start - 1)] * string(idx)
         end
 
         JLSO.save(filename * fileextension, failed)
@@ -327,15 +325,28 @@ function quickcheck(qc::Quickcheck)
 end
 
 """
-    @quickcheck qc
+    @quickcheck qc [file_id::AbstractString=yyyy-mm-dd_HH-MM-SS]
 
 Check the properties specified in object `qc` of type [`Quickcheck`](@ref).
 
 If `qc.serialize_fails` is `true`, serialize the failing cases to
-`JCheck_yyyy-mm-dd_HH-MM-SS.jchk`. Those can latter be analyzed using
+`JCheck_<file_id>.jchk`. Those can latter be analyzed using
 [`load`](@ref) and [`@getcases`](@ref).
+
+# Note
+
+If no argument `file_id` is passed, defaults to current time.
 """
+macro quickcheck(qc, file_id::AbstractString)
+    _qc = esc(qc)
+
+    :(quickcheck($_qc, $file_id))
+end
+
 macro quickcheck(qc)
     _qc = esc(qc)
-    :(quickcheck($_qc))
+
+    file_id = Dates.format(Dates.now(), "yyyy-mm-dd_HH-MM-SS")
+
+    :(@quickcheck($_qc, $file_id))
 end
