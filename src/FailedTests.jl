@@ -4,7 +4,8 @@ import Base:
     iterate,
     length,
     eltype,
-    getindex
+    getindex,
+    show
 
 using FilePathsBase: AbstractPath
 
@@ -70,4 +71,14 @@ function getcases(ft::FailedTests, desc::AbstractString)
                                      Levenshtein()))
 
     ft[desc_matched]
+end
+
+function show(io::IO, ::MIME"text/plain", ft::FailedTests)
+    nbfailed = length(ft)
+
+    print(io, "$nbfailed failing predicate", nbfailed > 1 ? "s" : "", ":\n")
+
+    for key ∈ keys(ft)
+        println(key)
+    end
 end
