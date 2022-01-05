@@ -318,7 +318,7 @@ function quickcheck(qc::Quickcheck)
         printstyled("@getcases",
                     color = message_color,
                     underline = true)
-        printstyled(" to explore the problematic cases.",
+        printstyled(" to explore problematic cases.",
                     color = message_color)
         println("\n")
     end
