@@ -1,15 +1,22 @@
 # Reference
 
-```@meta
+``` @meta
 CurrentModule = JCheck
 ```
 
-```@docs
-Quickcheck
-Quickcheck(::AbstractString)
-```
+## Quickcheck
 
 ``` @docs
+Quickcheck
+Quickcheck(::AbstractString)
 @add_predicate(::Any, ::Any, ::Any)
 @quickcheck(::Any)
+```
+
+## Failed Cases Analysis
+
+``` @docs
+FailedTests
+load(::Union{IO, AbstractString, AbstractPath})
+@getcases(::Any, ::Any...)
 ```
