@@ -215,10 +215,7 @@ function Base.show(io::IO, qc::Quickcheck)
     header = "$(qc.description): $nbpredicates $predicate_string and \
               $nbvariables free $variable_string"
 
-    if isempty(qc.variables)
-        print(io, header)
-        return
-    end
+    isempty(qc.variables) && return print(io, header)
 
     vars = String[]
     for (variable, entry) ∈ pairs(qc.variables)
