@@ -5,7 +5,8 @@ using Documenter
 DocMeta.setdocmeta!(JCheck,
                     :DocTestSetup,
                     :(using JCheck),
-                    recursive=true)
+                    recursive = true,
+                    warn = false)
 
 makedocs(sitename="JCheck.jl",
          doctest = true,
@@ -13,6 +14,5 @@ makedocs(sitename="JCheck.jl",
          pages = ["Home" => "index.md",
                   "Reference" => "reference.md"])
 
-deploydocs(
-    repo = "github.com/ps-pat/JCheck.jl.git",
-    devbranch = "main")
+deploydocs(repo = "github.com/ps-pat/JCheck.jl.git",
+           devbranch = "main")
