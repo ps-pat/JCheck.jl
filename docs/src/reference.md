@@ -20,3 +20,9 @@ FailedTests
 load(::Union{IO, AbstractString, AbstractPath})
 @getcases(::Any, ::Any...)
 ```
+
+## Random Input Generation
+
+``` @docs
+generate(::Type, ::Int)
+```
