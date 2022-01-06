@@ -91,8 +91,7 @@ function add_predicate(qc::Quickcheck,
         ## `arg` is not present already, simply add it. Otherwise, we
         ## make sure types are the same.
         oldtype_pair = get!(qc.variables, arg) do
-            values = [generate(qc.rng, type)
-                      for _ ∈ range(1, length = qc.n)]
+            values = generate(qc.rng, type, qc.n)
             (type = type, values = values)
         end
 
