@@ -75,6 +75,12 @@ Is odd
 
 julia> pred, valuations = @getcases ft iod
 NamedTuple{(:predicate, :valuations), Tuple{Function, Vector{Tuple}}}((Serialization.__deserialized_types__.var"#3#4"(), Tuple[(0,), (-9223372036854775808,), (6444904272543528628,)]))
+
+julia> map(x -> pred(x...), valuations)
+3-element Vector{Bool}:
+ 0
+ 0
+ 0
 ```
 """
 macro getcases(ft, desc...)
