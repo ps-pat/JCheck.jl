@@ -6,5 +6,6 @@ README.html
 
 JCheck_*
 !docs/JCheck_test.jchk
+!docs/src/JCheck_test.jchk
 
 docs/build/
