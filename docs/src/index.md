@@ -116,5 +116,50 @@ ERROR: Some tests did not pass: 2 passed, 1 failed, 0 errored, 0 broken.
 ```
 
 ### Analysing failing cases
+By default, failing test cases are serialized to a
+[JLSO](https://github.com/invenia/JLSO.jl) file so they can easily be
+analyzed.
+
+``` @example example_index
+ft = JCheck.load("JCheck_test.jchk")
+```
+
+Failing cases for a predicate can be extracted by using its
+description with [`@getcases`](@ref). There is no need to give the
+exact description of the predicate you want to extract; the entry with
+description closest to the one given (in the sense of the Levenshtein
+distance) will be matched.
+
+``` @example example_index
+pred, valuations = @getcases ft i od
+
+## Each element of `valuations` is a tuple.
+map(x -> pred(x...), valuations)
+```
 
 ### Testing With Custom Types
+JCheck can easily be extended to work with custom type from which it
+is possible to randomly sample instances. The only requirement is to
+overload [`generate`](@ref). For instance, an implementation for type
+`Int64` could look like this:
+
+``` @example example_index
+import JCheck: generate
+using Random: AbstractRNG
+
+generate(rng::AbstractRNG, ::Type{Int64}, n::Int) =
+    rand(rng, Int64, n)
+```
+
+Optionally, it is possible to specify so called "special cases" for a
+type. Those are always checked. Doing so is as easy as overloading
+[`specialcases`](@ref). For `Int`, this could look like this:
+
+``` @example
+import JCheck: specialcases
+
+specialcases(::Type{Int64}) =
+    Int64[0, 1, typemin(Int64), typemax(Int64)]
+```
+
+For implementation details, see documentation of these two functions.
