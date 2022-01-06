@@ -25,4 +25,5 @@ load(::Union{IO, AbstractString, AbstractPath})
 
 ``` @docs
 generate(::Type, ::Int)
+specialcases(::Type)
 ```
