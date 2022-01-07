@@ -24,6 +24,6 @@ load(::Union{IO, AbstractString, AbstractPath})
 ## Random Input Generation
 
 ``` @docs
-generate(::Type, ::Int)
+generate
 specialcases(::Type)
 ```

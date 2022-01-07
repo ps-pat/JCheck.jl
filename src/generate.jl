@@ -45,6 +45,9 @@ generate(rng, Float32, 10)
  -3.1891005f-12
 ```
 """
+function generate end
+
+## If no random number generator is specified, use `GLOBAL_RNG`.
 generate(::Type{T}, n::Int) where T = generate(GLOBAL_RNG, T, n)
 
 """
