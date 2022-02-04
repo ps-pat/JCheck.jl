@@ -137,6 +137,10 @@ pred, valuations = @getcases ft i od
 map(x -> pred(x...), valuations)
 ```
 
+### Types with built-in generators
+For a list of types for which a generator is included in the package,
+see reference for [`generate`](@ref).
+
 ### Testing With Custom Types
 JCheck can easily be extended to work with custom type from which it
 is possible to randomly sample instances. The only requirement is to
@@ -163,3 +167,4 @@ specialcases(::Type{Int64}) =
 ```
 
 For implementation details, see documentation of these two functions.
+
