@@ -167,4 +167,3 @@ specialcases(::Type{Int64}) =
 ```
 
 For implementation details, see documentation of these two functions.
-

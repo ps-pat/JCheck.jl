@@ -181,8 +181,3 @@ end
 function specialcases(::Type{Array{T, N}}) where {T, N}
     Array{T, N}[Array{T}(undef, [zero(Int) for _ ∈ 1:N]...)]
 end
-
-# function shrink(vec::Array{T, 1}) where T
-#     n = length(vec)
-#     Iterators.take(vec, n ÷ 2), Iterators.rest(vec, n ÷ 2 + 1)
-# end
