@@ -1,7 +1,9 @@
 using Random:
     AbstractRNG,
     GLOBAL_RNG,
-    bitrand
+    bitrand,
+    randexp,
+    randstring
 
 """
     generate([rng=GLOBAL_RNG], T, n)
@@ -14,13 +16,39 @@ Sample `n` random instances of type `T`.
 - `T::Type`: type of the instances.
 - `n::Int`: number of realizations to sample.
 
-# Implementation
+# Default generators
+`generate` methods for the following types are shipped with this package:
+- Subtypes of `AbstractFloat`
+- Subtypes of `Signed` except `BigInt`
+- Subtypes of `Unsigned`
+- `Complex{T <: Real}` where `T` is any subtype of `Real` for which a
+  `generate` method exists
+- `Bool`
+- `String`
+- `Char`
+- `Array{T, N}` where `T` is any type for which a `generate` method exists
 
+# Implementation
+When implementing `generate` for your type `T` keep the following in mind:
 - Your method should return a `Vector{T}`
-- It is not necessary to write `generate(T, n)`; this is handled
-  automatically. You only need to implement
-  `generate(::AbstractRNG, ::Type{T}, ::Int)`
+- It is not necessary to write `generate(T, n)` or
+ `generate([rng, ]Array{T, N}, n) where N`; this is handled automatically.
+  You only need to implement `generate(::AbstractRNG, ::Type{T}, ::Int)`
 - Consider implementing [`specialcases`](@ref) for `T` as well.
+
+# Arrays & Strings
+General purpose generators for arrays and strings are a little bit tricky
+to implement given that a length for each sampled element must be specified.
+The following choices have been made for the default generators shipped with
+this package:
+- `String`: The length of each string is approximately exponentially
+  distributed with mean 64.
+- `Array{T, N}`: The length of each dimension of a given array is
+ approximately exponentially distributed with mean 24 ÷ N + 1
+ (in a low effort attempt to keep the number of entries manageable).
+
+If this is not appropriate for your needs, don't hesitate to reimplement
+`generate`.
 
 # Examples
 ``` jldoctest
@@ -114,3 +142,47 @@ specialcases(::Type{T}) where T <: SampleableReal = T[zero(T),
                                                       one(T),
                                                       typemin(T),
                                                       typemax(T)]
+
+## Complex numbers.
+generate(rng::AbstractRNG, ::Type{Complex{T}}, n::Int) where T <: Real =
+    Complex.(generate(rng, T, n), generate(rng, T, n))
+
+## TODO: implement.
+specialcases(::Type{Complex{T}}) where T <: Real =
+    Complex{T}[]
+
+## Strings.
+randlen(theta::Real, args...) =
+    Int.(round.(randexp(args...) * theta)) .+ one(Int)
+
+function generate(rng::AbstractRNG, ::Type{String}, n::Int)
+    chrlst = UInt8['0':'9';'A':'Z';'a':'z'; ' ']
+    map(len -> randstring(rng, chrlst, len), randlen(63, n))
+end
+
+specialcases(::Type{String}) = String[""]
+
+## Chars.
+generate(rng::AbstractRNG, ::Type{Char}, n::Int) =
+    rand(rng, Char, n)
+
+## Array.
+function generate(rng::AbstractRNG,
+                  ::Type{Array{T, N}},
+                  n::Int) where {T, N}
+    lens = randlen(24 ÷ N, N)
+
+    sample = reshape(generate(rng, T, n * prod(lens)), lens..., n)
+
+    Array{T, N}[getindex(sample, [[(:) for _ ∈ 1:N]..., k]...)
+                for k ∈ 1:n]
+end
+
+function specialcases(::Type{Array{T, N}}) where {T, N}
+    Array{T, N}[Array{T}(undef, [zero(Int) for _ ∈ 1:N]...)]
+end
+
+# function shrink(vec::Array{T, 1}) where T
+#     n = length(vec)
+#     Iterators.take(vec, n ÷ 2), Iterators.rest(vec, n ÷ 2 + 1)
+# end
