@@ -152,12 +152,12 @@ specialcases(::Type{Complex{T}}) where T <: Real =
     Complex{T}[]
 
 ## Strings.
-randlen(theta::Real, args...) =
-    Int.(round.(randexp(args...) * theta)) .+ one(Int)
+randlen(rng::AbstractRNG, theta::Real, args...) =
+    Int.(round.(randexp(rng, args...) * theta)) .+ one(Int)
 
 function generate(rng::AbstractRNG, ::Type{String}, n::Int)
     chrlst = UInt8['0':'9';'A':'Z';'a':'z'; ' ']
-    map(len -> randstring(rng, chrlst, len), randlen(63, n))
+    map(len -> randstring(rng, chrlst, len), randlen(rng, 63, n))
 end
 
 specialcases(::Type{String}) = String[""]
@@ -167,16 +167,20 @@ generate(rng::AbstractRNG, ::Type{Char}, n::Int) =
     rand(rng, Char, n)
 
 ## Array.
+
+## TODO: call `rand` directly if possible.
 function generate(rng::AbstractRNG,
                   ::Type{Array{T, N}},
                   n::Int) where {T, N}
-    lens = randlen(24 ÷ N, N)
+    lens = randlen(rng, 24 ÷ N, N)
 
     sample = reshape(generate(rng, T, n * prod(lens)), lens..., n)
 
     Array{T, N}[getindex(sample, [[(:) for _ ∈ 1:N]..., k]...)
                 for k ∈ 1:n]
 end
+
+## TODO: BitArray
 
 function specialcases(::Type{Array{T, N}}) where {T, N}
     Array{T, N}[Array{T}(undef, [zero(Int) for _ ∈ 1:N]...)]
