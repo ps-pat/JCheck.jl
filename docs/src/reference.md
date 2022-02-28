@@ -27,3 +27,9 @@ load(::Union{IO, AbstractString, AbstractPath})
 generate
 specialcases(::Type)
 ```
+
+## Shrinkage
+
+``` @docs
+shrink
+```

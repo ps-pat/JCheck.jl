@@ -18,4 +18,8 @@ export load
 
 export @getcases
 
+include("shrink.jl")
+
+export shrink
+
 end
