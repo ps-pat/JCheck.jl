@@ -58,6 +58,9 @@ function shrink(x::AbstractArray{T, N}) where {T, N}
     shrink_array_loop!(ret, current_idx, x, ns, dims)
 end
 
+function shrink(x::AbstractString)
+    length(x) < 2 && return typeof(x)[x]
 
-    ret
+    n = length(x) ÷ 2
+    [x[1:n], x[range(n + 1, end)]]
 end

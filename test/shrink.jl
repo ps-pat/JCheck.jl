@@ -52,4 +52,10 @@
          [84; 85;;;; 114; 115],
          [86; 87; 88;;;; 116; 117; 118],
          [89; 90;;;; 119; 120]]
+
+    ## `AbstractString`.
+    s = "C'est pas de nos affaires, nous on est Iroquois."
+
+    @test shrink(s) ==
+        ["C'est pas de nos affaire", "s, nous on est Iroquois."]
 end
