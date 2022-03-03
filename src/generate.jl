@@ -169,16 +169,20 @@ generate(rng::AbstractRNG, ::Type{Char}, n::Int) =
 
 ## Array.
 
-## TODO: call `rand` directly if possible.
 function generate(rng::AbstractRNG,
                   ::Type{Array{T, N}},
                   n::Int) where {T, N}
-    lens = randlen(rng, 24 ÷ N, N)
+    ## Sizes of the arrays.
+    sizes = [randlen(rng, 24 ÷ N, N) for _ ∈ 1:n]
 
-    sample = reshape(generate(rng, T, n * prod(lens)), lens..., n)
-
-    Array{T, N}[getindex(sample, [[(:) for _ ∈ 1:N]..., k]...)
-                for k ∈ 1:n]
+    map(sizes) do σ
+        data = generate(rng, T, prod(σ))
+        ret = Array{T, N}(undef, σ...)
+        for k ∈ eachindex(ret)
+            ret[k] = data[k]
+        end
+        ret
+    end
 end
 
 ## TODO: BitArray
