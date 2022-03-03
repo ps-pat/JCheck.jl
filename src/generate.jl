@@ -3,7 +3,8 @@ using Random:
     GLOBAL_RNG,
     bitrand,
     randexp,
-    randstring
+    randstring,
+    bitrand
 
 """
     generate([rng=GLOBAL_RNG], T, n)
@@ -27,6 +28,7 @@ Sample `n` random instances of type `T`.
 - `String`
 - `Char`
 - `Array{T, N}` where `T` is any type for which a `generate` method exists
+- `BitArray{N}`
 
 # Implementation
 When implementing `generate` for your type `T` keep the following in mind:
@@ -185,8 +187,15 @@ function generate(rng::AbstractRNG,
     end
 end
 
-## TODO: BitArray
+function generate(rng::AbstractRNG, ::Type{BitArray{N}}, n::Int) where N
+    ## Sizes of the arrays.
+    sizes = [randlen(rng, 24 ÷ N, N) for _ ∈ 1:n]
 
-function specialcases(::Type{Array{T, N}}) where {T, N}
-    Array{T, N}[Array{T}(undef, [zero(Int) for _ ∈ 1:N]...)]
+    map(σ -> bitrand(rng, σ...), sizes)
+end
+
+@generated function specialcases(::Type{DT}) where DT <:
+    Union{Array{T, N}, BitArray{N}} where {T, N}
+
+    DT[DT(undef, [zero(Int) for _ ∈ 1:N]...)]
 end
