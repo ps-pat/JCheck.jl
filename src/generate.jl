@@ -32,9 +32,10 @@ Sample `n` random instances of type `T`.
 When implementing `generate` for your type `T` keep the following in mind:
 - Your method should return a `Vector{T}`
 - It is not necessary to write `generate(T, n)` or
- `generate([rng, ]Array{T, N}, n) where N`; this is handled automatically.
+  `generate([rng, ]Array{T, N}, n) where N`; this is handled automatically.
   You only need to implement `generate(::AbstractRNG, ::Type{T}, ::Int)`
-- Consider implementing [`specialcases`](@ref) for `T` as well.
+- Consider implementing [`specialcases`](@ref) and [`shrink`](@ref) for
+  `T` as well.
 
 # Arrays & Strings
 General purpose generators for arrays and strings are a little bit tricky
@@ -44,8 +45,8 @@ this package:
 - `String`: The length of each string is approximately exponentially
   distributed with mean 64.
 - `Array{T, N}`: The length of each dimension of a given array is
- approximately exponentially distributed with mean 24 ÷ N + 1
- (in a low effort attempt to keep the number of entries manageable).
+  approximately exponentially distributed with mean 24 ÷ N + 1
+  (in a low effort attempt to keep the number of entries manageable).
 
 If this is not appropriate for your needs, don't hesitate to reimplement
 `generate`.

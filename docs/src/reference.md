@@ -31,5 +31,6 @@ specialcases(::Type)
 ## Shrinkage
 
 ``` @docs
-shrink
+shrink(::Any)
+shrinkable(::Any)
 ```

@@ -13,7 +13,7 @@ Usable, but still a work in progress. Please have a look at the
 - [X] Support for special cases
 - [X] More informative message for failing tests
 - [X] Serialization of problematic cases
-- [ ] Shrinkage of failing test cases
+- [X] Shrinkage of failing test cases
 - [ ] More generators
 - [ ] Parallel testing
 - [ ] ...

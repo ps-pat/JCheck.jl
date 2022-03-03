@@ -8,6 +8,19 @@ using Base:
 Shrink an input. The returned value is a `Vector` with elements `similar`
 to `x`. Returning a vector of length 1 is interpreted as meaning that
 no further shrinkage is possible.
+
+# Default Shrinkers
+`shrink` methods for the following types are shipped with this package:
+- `AbstractString`
+- `AbstractArray{T, N}` for any `T` and `N`
+
+# Implementation
+- Any implementation of `shrink(x::T)` must come with an implementation of
+  [`shrinkable(x::T)`](@ref). Failure to do so will prevent
+  [`@quickcheck`](@ref) from calling `shrink` on an object of type `T`.
+- `shrink(x)` must return [x] if `shrinkable(x)` evaluate to `false`. We
+  suggest that the first line of your method is something like
+    shrinkable(x) || return typeof(x)[x]
 """
 shrink(x::T) where T = T[x] # Fallback method.
 
@@ -70,6 +83,10 @@ end
     shrinkable(x)
 
 Determines if `x` is shrinkable.
+
+# Note
+Shrinkage can easily be disabled for type `T` using overloading:
+    shrinkable(x::T) = false
 """
 shrinkable(x) = false # Fallback method
 

@@ -23,6 +23,7 @@ further experimentation.
 - Integration with Julia's testing framework.
 - Allow specification of "special cases" i.e. non-random inputs that
   are always checked.
+- Shrinkage of failing test cases.
 
 ## Usage
 ### Container
@@ -167,3 +168,29 @@ specialcases(::Type{Int64}) =
 ```
 
 For implementation details, see documentation of these two functions.
+
+#### Shrinkage
+[`@quickcheck`](@ref) will try to shrink any failing test case if
+possible. In order to enable shrinkage for a given type, the following
+two methods must be implemented:
+- [`shrinkable`](@ref)
+- [`shrink`](@ref)
+
+The first one is a predicate evaluating to `true` for an object if it
+can be shrinked. The second one is a function returning a `Vector` of
+shrunk objects. The implementation for type `Abstractstring` is the
+following:
+
+``` @example
+shrinkable(x::AbstractString) = length(x) >= 2
+
+function shrink(x::AbstractString)
+    shrinkable(x) || return typeof(x)[x]
+
+    n = length(x) ÷ 2
+    [x[1:n], x[range(n + 1, end)]]
+end
+```
+
+For more details and a list of default shrinkers, see the
+documentation of these methods.
