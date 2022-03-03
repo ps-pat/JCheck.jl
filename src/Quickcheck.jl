@@ -1,6 +1,8 @@
 using Random: AbstractRNG, GLOBAL_RNG
 
-using Base: method_argnames
+using Base:
+    splat,
+    Fix1
 
 using Test: @test, @testset
 
@@ -224,6 +226,35 @@ function Base.show(io::IO, qc::Quickcheck)
     print(io, header, "\n", join(vars, "\n"))
 end
 
+function evaluate_shrink(predicate::Function,
+                         valuation::Tuple,
+                         depth::Int)
+    ## If `valuation` satisfies `predicate`, an empty tuple is returned.
+    predicate(valuation...) && return (nothing, zero(Int))
+
+    ## Verify if at least one entry of valuation is shrinkable. If
+    ## that's not the case, just return it.
+    any(shrinkable, valuation) || return valuation, depth
+
+    ## Let the shrinkage begin!
+    candidates = valuation |>
+        Fix1(Iterators.map, shrink) |>
+        splat(Iterators.product)
+
+    res = mapreduce(v -> evaluate_shrink(predicate, v, depth + 1),
+                    (x, y) -> last(x) >= last(y) ? x : y,
+                    candidates)
+
+    ## If no candidate falsifies the predicate, just return the
+    ## original valuation.
+    isnothing(first(res)) && return valuation, depth
+
+    res
+end
+
+evaluate_shrink(predicate::Function, valuation::Tuple) =
+    first(evaluate_shrink(predicate, valuation, 1))
+
 function quickcheck(qc::Quickcheck, file_id::AbstractString)
     ## Stores failed cases. The key is the test predicate's
     ## description (as a symbol). The value is a named tuple
@@ -243,20 +274,20 @@ function quickcheck(qc::Quickcheck, file_id::AbstractString)
 
         ## Special cases.
         types = map(v -> qc.variables[v].type, args)
-        specialcases_itr =
-            Iterators.product(specialcases.(types)...) |>
-            Iterators.flatten |>
-            itr -> Iterators.partition(itr, length(args)) |>
-            itr -> Iterators.map(Tuple, itr)
+        specialcases_itr = types |>
+            Fix1(Iterators.map, specialcases) |>
+            splat(Iterators.product)
 
         ## Random cases.
-        randomcases = map(arg -> qc.variables[arg].values, args)
+        randomcases_itr = args |>
+            Fix1(Iterators.map, arg -> qc.variables[arg].values) |>
+            splat(Iterators.zip)
 
-        for valuation ∈ Iterators.flatten([specialcases_itr,
-                                           zip(randomcases...)])
-            pass = pred(valuation...)
+        for valuation ∈ Iterators.flatten((specialcases_itr,
+                                           randomcases_itr))
+            if !pred(valuation...)
+                valuation = evaluate_shrink(pred, valuation)
 
-            if !pass
                 ex = Expr(:tuple,
                           (Expr(:(=), arg, val)
                            for (arg, val) ∈ zip(args, valuation))...)
@@ -271,7 +302,6 @@ function quickcheck(qc::Quickcheck, file_id::AbstractString)
 
                     push!(failed[Symbol(desc)].valuations, valuation)
                 end
-
                 holds = false
             end
         end
