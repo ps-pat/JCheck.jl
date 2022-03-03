@@ -21,5 +21,6 @@ export @getcases
 include("shrink.jl")
 
 export shrink
+export shrinkable
 
 end

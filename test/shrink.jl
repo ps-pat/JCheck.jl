@@ -1,4 +1,17 @@
+reduce_length(x) = all(<=(length(x)), length.(shrink(x)))
+
 @testset "Shrink methods" begin
+    qc = Quickcheck("shrink")
+
+    @add_predicate qc "Reduce string length" s::String -> reduce_length(s)
+
+    @add_predicate(qc,
+                   "Reduce vector length",
+                   v::Vector{Int} -> reduce_length(v))
+    @add_predicate(qc,
+                   "Reduce matrix length",
+                   M::Matrix{Int} -> reduce_length(M))
+
     ## `AbstractArray`.
     vec = collect(1:5)
     mat = vcat(vec * vec', vec * vec', vec * vec')
@@ -58,4 +71,6 @@
 
     @test shrink(s) ==
         ["C'est pas de nos affaire", "s, nous on est Iroquois."]
+
+    @quickcheck qc
 end

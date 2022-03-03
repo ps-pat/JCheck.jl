@@ -1,13 +1,13 @@
+using Base:
+    splat,
+    Fix2
+
 """
     shrink(x)
 
-Shrinks an input. Assuming that `x` is of type `T`, the returned value is
-of type `Vector{Array{T, N}}`. Returning a vector of length 1 is
-interpreted as meaning that no further shrinkage is possible.
-
-# Note
-The length of `x` must be at least `2^N` for shrinkage to be possible.
-If this is not the case, an array of length 1 containing x will be returned.
+Shrink an input. The returned value is a `Vector` with elements `similar`
+to `x`. Returning a vector of length 1 is interpreted as meaning that
+no further shrinkage is possible.
 """
 shrink(x::T) where T = T[x] # Fallback method.
 
@@ -35,7 +35,7 @@ function shrink_array_loop!(ret::Vector,
 end
 
 function shrink(x::AbstractArray{T, N}) where {T, N}
-    any(x -> x < 2, size(x)) && return typeof(x)[x]
+    shrinkable(x) || return typeof(x)[x]
 
     ## Length of each dimension of `x`.
     ns = [size(x)...]
@@ -45,22 +45,34 @@ function shrink(x::AbstractArray{T, N}) where {T, N}
     dims = hcat(ns .- ns .÷ 2, ns .÷ 2)
 
     ## Preallocate memory for the sub-arrays.
-    ret_dims = Iterators.product(eachrow(dims)...) |>
+    ret_dims = eachrow(dims) |>
+        splat(Iterators.product) |>
         Iterators.flatten |>
-        α -> Iterators.partition(α, N)
+        Fix2(Iterators.partition, N)
     ret = [similar(x, eltype(x), Tuple(dim)) for dim ∈ ret_dims]
 
     ## Index of the entry to fill by sub-array.
     current_idx = ones(Int, length(ret))
 
     ## Doing the heavy lifting in a separate function leads to huge
-    ## improvements in terms of speed in memory usage.
+    ## improvements in terms of speed and memory usage.
     shrink_array_loop!(ret, current_idx, x, ns, dims)
 end
 
 function shrink(x::AbstractString)
-    length(x) < 2 && return typeof(x)[x]
+    shrinkable(x) || return typeof(x)[x]
 
     n = length(x) ÷ 2
     [x[1:n], x[range(n + 1, end)]]
 end
+
+"""
+    shrinkable(x)
+
+Determines if `x` is shrinkable.
+"""
+shrinkable(x) = false # Fallback method
+
+shrinkable(x::AbstractArray) = all(>=(2), size(x))
+
+shrinkable(x::AbstractString) = length(x) >= 2
