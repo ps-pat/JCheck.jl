@@ -22,5 +22,5 @@ Usable, but still a work in progress. Please have a look at the
 - [Randomized Property Test](https://git.sr.ht/~quf/RandomizedPropertyTest.jl): inspiration for this package.
 - [QuickCheck](https://github.com/nick8325/quickcheck): OG random
   property based testing.
-- [JLSO](https://github.com/invenia/JLSO.jl): Used for containing
+- [JLSO](https://github.com/invenia/JLSO.jl): used for containing
   serialized test objects.

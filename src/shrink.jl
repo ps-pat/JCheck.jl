@@ -20,6 +20,7 @@ no further shrinkage is possible.
   [`@quickcheck`](@ref) from calling `shrink` on an object of type `T`.
 - `shrink(x)` must return [x] if `shrinkable(x)` evaluate to `false`. We
   suggest that the first line of your method is something like
+
     shrinkable(x) || return typeof(x)[x]
 """
 shrink(x::T) where T = T[x] # Fallback method.
@@ -86,6 +87,7 @@ Determines if `x` is shrinkable.
 
 # Note
 Shrinkage can easily be disabled for type `T` using overloading:
+
     shrinkable(x::T) = false
 """
 shrinkable(x) = false # Fallback method
