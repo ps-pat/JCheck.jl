@@ -12,9 +12,7 @@ import Dates
 
 include("InternalTestSet.jl")
 
-ArgsDict = Dict{Symbol,
-                NamedTuple{(:type, :values),
-                           Tuple{DataType, Vector{Any}}}}
+ArgsDict = Dict{Symbol, Vector}
 
 PredsAssoc = Vector{NamedTuple{(:pred, :desc, :args),
                                Tuple{Function, String, Vector{Symbol}}}}
@@ -93,14 +91,14 @@ function add_predicate(qc::Quickcheck,
         ## `arg` is not present already, simply add it. Otherwise, we
         ## make sure types are the same.
         oldtype_pair = get!(qc.variables, arg) do
-            values = generate(qc.rng, type, qc.n)
-            (type = type, values = values)
+            generate(qc.rng, type, qc.n)
         end
 
-        oldtype_pair.type === type && continue
+        eltype(oldtype_pair) === type && continue
 
         error("A declaration for variable $arg already exists with type \
-               $(oldtype_pair.type); please choose another name for $arg")
+               $(eltype(oldtype_pair)); please choose another name for \
+               $arg")
     end
 
     push!(qc.predicates, (pred = pred, desc = desc, args = [args...]))
@@ -201,7 +199,7 @@ function destructure_declaration(vardec::Union{Vector{Expr},
                                                Tuple{Vararg{Expr}}})
     args, types = vardec |>
         args -> Iterators.map(e -> [first(e.args), last(e.args)], args) |>
-        it -> Iterators.zip(it...)
+        splat(Iterators.zip)
 
     args, esc(Expr(:tuple, types...))
 end
@@ -220,7 +218,7 @@ function Base.show(io::IO, qc::Quickcheck)
 
     vars = String[]
     for (variable, entry) ∈ pairs(qc.variables)
-        push!(vars, string(variable) * "::" * string(entry.type))
+        push!(vars, string(variable) * "::" * string(eltype(entry)))
     end
 
     print(io, header, "\n", join(vars, "\n"))
@@ -273,14 +271,14 @@ function quickcheck(qc::Quickcheck, file_id::AbstractString)
         local holds = true
 
         ## Special cases.
-        types = map(v -> qc.variables[v].type, args)
-        specialcases_itr = types |>
-            Fix1(Iterators.map, specialcases) |>
+        specialcases_itr = args |>
+            Fix1(Iterators.map,
+                 specialcases ∘ eltype ∘ Fix1(getindex, qc.variables)) |>
             splat(Iterators.product)
 
         ## Random cases.
         randomcases_itr = args |>
-            Fix1(Iterators.map, arg -> qc.variables[arg].values) |>
+            Fix1(Iterators.map, Fix1(getindex, qc.variables)) |>
             splat(Iterators.zip)
 
         for valuation ∈ Iterators.flatten((specialcases_itr,
