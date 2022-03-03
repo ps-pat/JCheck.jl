@@ -6,6 +6,13 @@ using Random:
     randstring,
     bitrand
 
+using Base: Fix1
+
+using LinearAlgebra:
+    Diagonal,
+    Bidiagonal,
+    Tridiagonal
+
 """
     generate([rng=GLOBAL_RNG], T, n)
 
@@ -20,15 +27,14 @@ Sample `n` random instances of type `T`.
 # Default generators
 `generate` methods for the following types are shipped with this package:
 - Subtypes of `AbstractFloat`
-- Subtypes of `Signed` except `BigInt`
-- Subtypes of `Unsigned`
+- Subtypes of `Integer` except `BigInt`
 - `Complex{T <: Real}` where `T` is any subtype of `Real` for which a
   `generate` method exists
-- `Bool`
 - `String`
 - `Char`
 - `Array{T, N}` where `T` is any type for which a `generate` method exists
 - `BitArray{N}`
+- `Diagonal`, `Bidiagonal` & `Tridiagonal` matrices (from LinearAlgebra)
 
 # Implementation
 When implementing `generate` for your type `T` keep the following in mind:
@@ -196,3 +202,32 @@ end
 
     DT[DT(undef, [zero(Int) for _ ∈ 1:N]...)]
 end
+
+## Special Matrices
+
+generate(rng::AbstractRNG, ::Type{Diagonal{T}}, n::Int) where T =
+    randlen(rng, 12, n) .|> Fix1(generate, T) .|> Diagonal
+
+@generated specialcases(::Type{Diagonal{T}}) where T =
+    Diagonal[Diagonal{T}(T[])]
+
+generate(rng::AbstractRNG, ::Type{Bidiagonal{T}}, n::Int) where T =
+    map(zip(randlen(rng, 12, n), bitrand(rng, n))) do (σ, uplo)
+        ul = uplo ? :U : :L
+        data = generate(rng, T, 2σ - 1)
+        Bidiagonal(data[1:σ], data[range(σ + 1, 2σ - 1)], ul)
+    end
+
+@generated specialcases(::Type{Bidiagonal{T}}) where T =
+    Bidiagonal{T}[Bidiagonal{T}(T[], T[], :U)]
+
+generate(rng::AbstractRNG, ::Type{Tridiagonal{T}}, n::Int) where T =
+    map(randlen(rng, 12, n)) do σ
+        data = generate(rng, T, 3σ - 2)
+        Tridiagonal(data[range(1, σ - 1)],
+                    data[range(σ, 2σ - 1)],
+                    data[range(2σ, 3σ - 2)])
+    end
+
+@generated specialcases(::Type{Tridiagonal{T}}) where T =
+    Tridiagonal{T}[Tridiagonal{T}(T[], T[], T[])]
