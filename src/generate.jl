@@ -116,7 +116,7 @@ julia> specialcases(Float64)
   Inf
 ```
 """
-specialcases(::Type{T}) where T = Vector{T}()
+@generated specialcases(::Type{T}) where T = Vector{T}()
 
 ## Subtypes of Real on which `rand` can be called directly.
 SampleableReal = Union{AbstractFloat,
@@ -141,18 +141,15 @@ for (type, size) ∈ Dict(Float16 => 16, Float32 => 32, Float64 => 64)
     end
 end
 
-specialcases(::Type{T}) where T <: SampleableReal = T[zero(T),
-                                                      one(T),
-                                                      typemin(T),
-                                                      typemax(T)]
+@generated specialcases(::Type{T}) where T <: SampleableReal =
+    T[zero(T), one(T), typemin(T), typemax(T)]
 
 ## Complex numbers.
 generate(rng::AbstractRNG, ::Type{Complex{T}}, n::Int) where T <: Real =
     Complex.(generate(rng, T, n), generate(rng, T, n))
 
 ## TODO: implement.
-specialcases(::Type{Complex{T}}) where T <: Real =
-    Complex{T}[]
+@generated specialcases(::Type{Complex{T}}) where T <: Real = Complex{T}[]
 
 ## Strings.
 randlen(rng::AbstractRNG, theta::Real, args...) =
@@ -163,7 +160,7 @@ function generate(rng::AbstractRNG, ::Type{String}, n::Int)
     map(len -> randstring(rng, chrlst, len), randlen(rng, 63, n))
 end
 
-specialcases(::Type{String}) = String[""]
+@generated specialcases(::Type{String}) = String[""]
 
 ## Chars.
 generate(rng::AbstractRNG, ::Type{Char}, n::Int) =
