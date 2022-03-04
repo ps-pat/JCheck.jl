@@ -6,12 +6,34 @@ using Random:
     randstring,
     bitrand
 
-using Base: Fix1
+using Base:
+    Fix1,
+    IndexLinear
+
+import Base:
+    eltype,
+    length,
+    ndims,
+    size,
+    axes,
+    eachindex,
+    stride,
+    IndexStyle,
+    getindex
 
 using LinearAlgebra:
-    Diagonal,
+    Symmetric,
+    Hermitian,
+    UpperTriangular,
+    UnitUpperTriangular,
+    LowerTriangular,
+    UnitLowerTriangular,
+    UpperHessenberg,
+    Tridiagonal,
+    SymTridiagonal,
     Bidiagonal,
-    Tridiagonal
+    Diagonal,
+    UniformScaling
 
 """
     generate([rng=GLOBAL_RNG], T, n)
@@ -28,22 +50,24 @@ Sample `n` random instances of type `T`.
 `generate` methods for the following types are shipped with this package:
 - Subtypes of `AbstractFloat`
 - Subtypes of `Integer` except `BigInt`
-- `Complex{T <: Real}` where `T` is any subtype of `Real` for which a
-  `generate` method exists
+- `Complex{T <: Real}`
 - `String`
 - `Char`
-- `Array{T, N}` where `T` is any type for which a `generate` method exists
+- `Array{T, N}`
 - `BitArray{N}`
-- `Diagonal`, `Bidiagonal` & `Tridiagonal` matrices (from LinearAlgebra)
+- `SquareMatrix{T}` exists`.
+- Any [special matrix](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#Special-matrices) implemented by Julia's LinearAlgebra module.
 
-# Implementation
-When implementing `generate` for your type `T` keep the following in mind:
-- Your method should return a `Vector{T}`
-- It is not necessary to write `generate(T, n)` or
-  `generate([rng, ]Array{T, N}, n) where N`; this is handled automatically.
-  You only need to implement `generate(::AbstractRNG, ::Type{T}, ::Int)`
-- Consider implementing [`specialcases`](@ref) and [`shrink`](@ref) for
-  `T` as well.
+In the previous list, `T` represent any type for which a `generate`
+method is implemented.
+
+# Special Matrices (LinearAlgebra)
+- Generators are implemented for `<...>Triangular{T}` as well as
+  `<...>Triangular{T, S}`. In the first case, `S` default to
+  `SquareMatrix{T}`. The exact same thing is true for `UpperHessenberg`.
+- Generators are only implemented for `Symmetric{T, S}` and
+  `Hermitian{T, S}` right now. Most of the time, you will want to specify
+  `S` = `SquareMatrix{T}`.
 
 # Arrays & Strings
 General purpose generators for arrays and strings are a little bit tricky
@@ -58,6 +82,15 @@ this package:
 
 If this is not appropriate for your needs, don't hesitate to reimplement
 `generate`.
+
+# Implementation
+When implementing `generate` for your type `T` keep the following in mind:
+- Your method should return a `Vector{T}`
+- It is not necessary to write `generate(T, n)` or
+  `generate([rng, ]Array{T, N}, n) where N`; this is handled automatically.
+  You only need to implement `generate(::AbstractRNG, ::Type{T}, ::Int)`
+- Consider implementing [`specialcases`](@ref) and [`shrink`](@ref) for
+  `T` as well.
 
 # Examples
 ``` jldoctest
@@ -138,10 +171,10 @@ SampleableReal = Union{AbstractFloat,
 generate(rng::AbstractRNG, ::Type{T}, n::Int) where T <: SampleableReal =
     rand(rng, T, n)
 
-for (type, size) ∈ Dict(Float16 => 16, Float32 => 32, Float64 => 64)
+for (type, σ) ∈ Dict(:Float16 => 16, :Float32 => 32, :Float64 => 64)
     @eval begin
         function generate(rng::AbstractRNG, ::Type{$type}, n::Int)
-            raw_data = reinterpret($type, bitrand(rng, $size * n).chunks)
+            raw_data = reinterpret($type, bitrand(rng, $σ * n).chunks)
             convert(Vector{$type}, raw_data)[begin:n]
         end
     end
@@ -205,11 +238,35 @@ end
 
 ## Special Matrices
 
+struct SquareMatrix{T} <: DenseMatrix{T}
+    mat::Matrix{T}
+end
+
+IndexStyle(::Type{<:SquareMatrix}) = IndexLinear()
+
+for func ∈ [:eltype,
+            :length,
+            :ndims,
+            :size,
+            :axes,
+            :eachindex,
+            :stride,
+            :getindex]
+    @eval $func(M::SquareMatrix, args...) = $func(M.mat, args...)
+end
+
+function generate(rng::AbstractRNG, ::Type{SquareMatrix{T}}, n::Int) where T
+    sizes = randlen(rng, 12, n)
+
+    SquareMatrix{T}[SquareMatrix{T}(reshape(generate(rng, T, σ^2), σ, σ))
+                    for σ ∈ sizes]
+end
+
+@generated specialcases(::Type{SquareMatrix{T}}) where T =
+    SquareMatrix{T}.(specialcases(Matrix{T}))
+
 generate(rng::AbstractRNG, ::Type{Diagonal{T}}, n::Int) where T =
     randlen(rng, 12, n) .|> Fix1(generate, T) .|> Diagonal
-
-@generated specialcases(::Type{Diagonal{T}}) where T =
-    Diagonal[Diagonal{T}(T[])]
 
 generate(rng::AbstractRNG, ::Type{Bidiagonal{T}}, n::Int) where T =
     map(zip(randlen(rng, 12, n), bitrand(rng, n))) do (σ, uplo)
@@ -217,9 +274,6 @@ generate(rng::AbstractRNG, ::Type{Bidiagonal{T}}, n::Int) where T =
         data = generate(rng, T, 2σ - 1)
         Bidiagonal(data[1:σ], data[range(σ + 1, 2σ - 1)], ul)
     end
-
-@generated specialcases(::Type{Bidiagonal{T}}) where T =
-    Bidiagonal{T}[Bidiagonal{T}(T[], T[], :U)]
 
 generate(rng::AbstractRNG, ::Type{Tridiagonal{T}}, n::Int) where T =
     map(randlen(rng, 12, n)) do σ
@@ -229,5 +283,57 @@ generate(rng::AbstractRNG, ::Type{Tridiagonal{T}}, n::Int) where T =
                     data[range(2σ, 3σ - 2)])
     end
 
-@generated specialcases(::Type{Tridiagonal{T}}) where T =
-    Tridiagonal{T}[Tridiagonal{T}(T[], T[], T[])]
+generate(rng::AbstractRNG, ::Type{SymTridiagonal{T}}, n::Int) where T =
+    map(randlen(rng, 12, n)) do σ
+        data = generate(rng, T, 2σ - 1)
+        SymTridiagonal(data[1:σ], data[range(σ + 1, 2σ - 1)])
+    end
+
+generate(rng::AbstractRNG, ::Type{UniformScaling{T}}, n::Int) where T =
+    UniformScaling.(generate(rng, T, n))
+
+for (type, args) ∈ Dict(:Diagonal => ([],),
+                        :Bidiagonal => ([], [], :U),
+                        :Tridiagonal => ([], [], []),
+                        :SymTridiagonal => ([], []),
+                        :UniformScaling => (0,))
+    @eval begin
+        @generated specialcases(::Type{$type{T}}) where T =
+            $type{T}[$type{T}($args...)]
+    end
+end
+
+for type ∈ [:Symmetric, :Hermitian]
+    @eval begin
+        generate(rng::AbstractRNG,
+                 ::Type{$type{T, S}},
+                 n::Int) where {T, S} =
+                     map((M, uplo) -> $type(M, uplo ? :U : :L),
+                         generate(rng, SquareMatrix{T}, n), bitrand(rng, n))
+
+        @generated specialcases(::Type{$type{T, S}}) where {T, S} =
+            $type.(specialcases(S))
+    end
+end
+
+for (type, mat) ∈ Dict(:UpperTriangular => :SquareMatrix,
+                       :UnitUpperTriangular => :SquareMatrix,
+                       :LowerTriangular => :SquareMatrix,
+                       :UnitLowerTriangular => :SquareMatrix,
+                       :UpperHessenberg => :Matrix)
+    @eval begin
+        generate(rng::AbstractRNG, ::Type{$type{T}}, n::Int) where T =
+            generate(rng, $type{T, $mat{T}}, n)
+
+        generate(rng::AbstractRNG,
+                 ::Type{$type{T, S}},
+                 n::Int) where {T, S} =
+                     $type{T}.(generate(rng, S, n))
+
+        @generated specialcases(::Type{$type{T, S}}) where {T, S} =
+            $type{T, S}.(specialcases(S))
+
+        @generated specialcases(::Type{$type{T}}) where T =
+            specialcases($type{T, $mat{T}})
+    end
+end
