@@ -187,8 +187,11 @@ end
 generate(rng::AbstractRNG, ::Type{Complex{T}}, n::Int) where T <: Real =
     Complex.(generate(rng, T, n), generate(rng, T, n))
 
-## TODO: implement.
-@generated specialcases(::Type{Complex{T}}) where T <: Real = Complex{T}[]
+@generated specialcases(::Type{Complex{T}}) where T <: Real =
+    Complex{T}[zero(Complex{T}),
+               one(Complex{T}),
+               typemin(T) + typemin(T)im,
+               typemax(T) + typemax(T)im]
 
 ## Strings.
 randlen(rng::AbstractRNG, theta::Real, args...) =
@@ -204,6 +207,8 @@ end
 ## Chars.
 generate(rng::AbstractRNG, ::Type{Char}, n::Int) =
     rand(rng, Char, n)
+
+@generated specialcases(::Type{Char}) = Char['\0']
 
 ## Array.
 
