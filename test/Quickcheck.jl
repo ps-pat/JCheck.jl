@@ -30,4 +30,15 @@
     @test_throws(ErrorException,
                  @add_predicate(qc, "sum commute",
                                 [n, x] -> n + x == x + n))
+
+    ## Test that every type for which a `generate` method exists can
+    ## be added to a `Quickcheck`.
+    for type ∈ types_with_generate
+        @eval begin
+            qc = Quickcheck("dummy")
+            @test @add_predicate(qc,
+                                 string($type),
+                                 x::$type -> identity(x)) isa Quickcheck
+        end
+    end
 end

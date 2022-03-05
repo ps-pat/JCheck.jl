@@ -67,6 +67,7 @@ method is implemented.
 - Generators are implemented for `<...>Triangular{T}` as well as
   `<...>Triangular{T, S}`. In the first case, `S` default to
   `SquareMatrix{T}`. The exact same thing is true for `UpperHessenberg`.
+- Same idea for `<...>diagonal{T, V}` with `V` defaulting to `Vector{T}`.
 - Generators are only implemented for `Symmetric{T, S}` and
   `Hermitian{T, S}` right now. Most of the time, you will want to specify
   `S` = `SquareMatrix{T}`.
@@ -272,17 +273,17 @@ end
 @generated specialcases(::Type{SquareMatrix{T}}) where T =
     SquareMatrix{T}.(specialcases(Matrix{T}))
 
-generate(rng::AbstractRNG, ::Type{Diagonal{T}}, n::Int) where T =
+generate(rng::AbstractRNG, ::Type{Diagonal{T, S}}, n::Int) where {T, S} =
     randlen(rng, 12, n) .|> Fix1(generate, T) .|> Diagonal
 
-generate(rng::AbstractRNG, ::Type{Bidiagonal{T}}, n::Int) where T =
+generate(rng::AbstractRNG, ::Type{Bidiagonal{T, S}}, n::Int) where {T, S} =
     map(zip(randlen(rng, 12, n), bitrand(rng, n))) do (σ, uplo)
         ul = uplo ? :U : :L
         data = generate(rng, T, 2σ - 1)
         Bidiagonal(data[1:σ], data[range(σ + 1, 2σ - 1)], ul)
     end
 
-generate(rng::AbstractRNG, ::Type{Tridiagonal{T}}, n::Int) where T =
+generate(rng::AbstractRNG, ::Type{Tridiagonal{T, S}}, n::Int) where {T, S} =
     map(randlen(rng, 12, n)) do σ
         data = generate(rng, T, 3σ - 2)
         Tridiagonal(data[range(1, σ - 1)],
@@ -290,7 +291,9 @@ generate(rng::AbstractRNG, ::Type{Tridiagonal{T}}, n::Int) where T =
                     data[range(2σ, 3σ - 2)])
     end
 
-generate(rng::AbstractRNG, ::Type{SymTridiagonal{T}}, n::Int) where T =
+generate(rng::AbstractRNG,
+         ::Type{SymTridiagonal{T, S}},
+         n::Int) where {T, S} =
     map(randlen(rng, 12, n)) do σ
         data = generate(rng, T, 2σ - 1)
         SymTridiagonal(data[1:σ], data[range(σ + 1, 2σ - 1)])
@@ -302,13 +305,15 @@ generate(rng::AbstractRNG, ::Type{UniformScaling{T}}, n::Int) where T =
 for (type, args) ∈ Dict(:Diagonal => ([],),
                         :Bidiagonal => ([], [], :U),
                         :Tridiagonal => ([], [], []),
-                        :SymTridiagonal => ([], []),
-                        :UniformScaling => (0,))
+                        :SymTridiagonal => ([], []))
     @eval begin
-        @generated specialcases(::Type{$type{T}}) where T =
-            $type{T}[$type{T}($args...)]
+        @generated specialcases(::Type{$type{T, S}}) where {T, S} =
+            $type{T, S}[$type{T, S}($args...)]
     end
 end
+
+@generated specialcases(::Type{UniformScaling{T}}) where T =
+    UniformScaling{T}[UniformScaling{T}(0)]
 
 for type ∈ [:Symmetric, :Hermitian]
     @eval begin
@@ -329,9 +334,6 @@ for (type, mat) ∈ Dict(:UpperTriangular => :SquareMatrix,
                        :UnitLowerTriangular => :SquareMatrix,
                        :UpperHessenberg => :Matrix)
     @eval begin
-        generate(rng::AbstractRNG, ::Type{$type{T}}, n::Int) where T =
-            generate(rng, $type{T, $mat{T}}, n)
-
         generate(rng::AbstractRNG,
                  ::Type{$type{T, S}},
                  n::Int) where {T, S} =
@@ -339,6 +341,21 @@ for (type, mat) ∈ Dict(:UpperTriangular => :SquareMatrix,
 
         @generated specialcases(::Type{$type{T, S}}) where {T, S} =
             $type{T, S}.(specialcases(S))
+    end
+end
+
+for (type, mat) ∈ Dict(:UpperTriangular => :SquareMatrix,
+                       :UnitUpperTriangular => :SquareMatrix,
+                       :LowerTriangular => :SquareMatrix,
+                       :UnitLowerTriangular => :SquareMatrix,
+                       :UpperHessenberg => :Matrix,
+                       :Diagonal => :Vector,
+                       :Bidiagonal => :Vector,
+                       :Tridiagonal => :Vector,
+                       :SymTridiagonal => :Vector)
+    @eval begin
+        generate(rng::AbstractRNG, ::Type{$type{T}}, n::Int) where T =
+            generate(rng, $type{T, $mat{T}}, n)
 
         @generated specialcases(::Type{$type{T}}) where T =
             specialcases($type{T, $mat{T}})
@@ -377,6 +394,9 @@ function generate(rng::AbstractRNG, U::Union, n::Int)
 
     chunksize = n ÷ m
     chunksizes = [fill(chunksize, m - 1); n - (m - 1) * chunksize]
+
+    ## TODO: Compiler can't infer the type of `ret`, probably because
+    ## the type of `generate(...)` cannot be inferred.
     ret::Vector{U} = mapreduce((n, type) -> generate(rng, type, n),
                                vcat,
                                chunksizes, types)
@@ -385,5 +405,6 @@ function generate(rng::AbstractRNG, U::Union, n::Int)
 end
 
 specialcases(U::Union) =
-    specialcases.(destructure_union(U)) |>
+    destructure_union(U) .|>
+    specialcases |>
     collect ∘ Iterators.flatten

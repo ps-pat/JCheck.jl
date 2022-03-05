@@ -77,7 +77,9 @@ end
 function add_predicate(qc::Quickcheck,
                        desc::AbstractString,
                        args::Vector{Symbol},
-                       types::Vector{DataType},
+                       types::Union{Vector{DataType},
+                                    Vector{UnionAll},
+                                    Vector{Union}},
                        pred::Function)
     ## Make sure that no predicate with the same description exists in
     ## `qc`.
@@ -90,15 +92,16 @@ function add_predicate(qc::Quickcheck,
         ## Make sure that suitable variables are available in `qc`. If
         ## `arg` is not present already, simply add it. Otherwise, we
         ## make sure types are the same.
-        oldtype_pair = get!(qc.variables, arg) do
-            generate(qc.rng, type, qc.n)
+        if !haskey(qc.variables, arg)
+            qc.variables[arg] = generate(qc.rng, type, qc.n)
+            continue
         end
 
-        eltype(oldtype_pair) === type && continue
+        oldtype = eltype(qc.variables[arg])
+        oldtype === type && continue
 
         error("A declaration for variable $arg already exists with type \
-               $(eltype(oldtype_pair)); please choose another name for \
-               $arg")
+               $oldtype; please choose another name for $arg")
     end
 
     push!(qc.predicates, (pred = pred, desc = desc, args = [args...]))
