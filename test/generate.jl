@@ -31,10 +31,17 @@ types_with_generate = [Bool,
                        UnitLowerTriangular{Float64},
                        UpperHessenberg{Float64}, Tridiagonal{Float64},
                        SymTridiagonal{Float64}, Bidiagonal{Float64},
-                       Diagonal{Float64}, UniformScaling{Float64}]
+                       Diagonal{Float64}, UniformScaling{Float64},
+                       Union{Complex{Float64}, String, Char,
+                             Vector{Float64}, Matrix{Int},
+                             Array{Float32, 3}, BitVector, BitMatrix,
+                             BitArray{5}, SquareMatrix{Float64},
+                             Symmetric{Float64, SquareMatrix{Float64}}}]
 @testset "generate & specialcases methods" begin
     for type ∈ types_with_generate
         @test length(generate(type, 100)) == 100
         @test !isempty(specialcases(type))
     end
+
+    @test isempty(specialcases(Any))
 end

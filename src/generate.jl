@@ -4,7 +4,8 @@ using Random:
     bitrand,
     randexp,
     randstring,
-    bitrand
+    bitrand,
+    shuffle!
 
 using Base:
     Fix1,
@@ -57,6 +58,7 @@ Sample `n` random instances of type `T`.
 - `BitArray{N}`
 - `SquareMatrix{T}` exists`.
 - Any [special matrix](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#Special-matrices) implemented by Julia's LinearAlgebra module.
+- `Union{T...}`
 
 In the previous list, `T` represent any type for which a `generate`
 method is implemented.
@@ -342,3 +344,46 @@ for (type, mat) ∈ Dict(:UpperTriangular => :SquareMatrix,
             specialcases($type{T, $mat{T}})
     end
 end
+
+## Union Type
+function destructure_union(U::Union)
+    types = sizehint!(DataType[], 4)
+    U2 = U
+    aunion = U2.a isa Union
+    bunion = U2.b isa Union
+    while true
+        if aunion
+            bunion || push!(types, U2.b)
+            U2 = U2.a
+        elseif bunion
+            aunion || push!(types, U2.a)
+            U2 = U2.b
+        else
+            push!(types, U2.a, U2.b)
+            break
+        end
+        aunion = U2.a isa Union
+        bunion = U2.b isa Union
+    end
+    types
+end
+
+function generate(rng::AbstractRNG, U::Union, n::Int)
+    types = destructure_union(U)
+    m = length(types)
+
+    n < m && error("The number of elements in `U` must be greater than or \
+                    equal to `n`.")
+
+    chunksize = n ÷ m
+    chunksizes = [fill(chunksize, m - 1); n - (m - 1) * chunksize]
+    ret::Vector{U} = mapreduce((n, type) -> generate(rng, type, n),
+                               vcat,
+                               chunksizes, types)
+
+    shuffle!(ret)
+end
+
+specialcases(U::Union) =
+    specialcases.(destructure_union(U)) |>
+    collect ∘ Iterators.flatten
