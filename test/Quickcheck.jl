@@ -37,8 +37,9 @@
         @eval begin
             qc = Quickcheck("dummy")
             @test @add_predicate(qc,
-                                 string($type),
-                                 x::$type -> identity(x)) isa Quickcheck
+                                 string($type) * " true",
+                                 x::$type -> true) isa Quickcheck
+            @test isnothing(@quickcheck qc)
         end
     end
 end
