@@ -14,6 +14,9 @@ reduce_length(x) = all(<=(length(x)), length.(shrink(x)))
     @add_predicate(qc,
                    "Reduce diagonal matrix length",
                    DM::Diagonal{Int} -> reduce_length(DM))
+    @add_predicate(qc,
+                   "Reduce UnitRange length",
+                   UR::UnitRange{Int} -> reduce_length(UR))
 
     ## `AbstractArray`.
     vec = collect(1:5)

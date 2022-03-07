@@ -59,6 +59,7 @@ Sample `n` random instances of type `T`.
 - `SquareMatrix{T}` exists`.
 - Any [special matrix](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#Special-matrices) implemented by Julia's LinearAlgebra module.
 - `Union{T...}`
+- `UnitRange{T}`
 
 In the previous list, `T` represent any type for which a `generate`
 method is implemented.
@@ -401,3 +402,17 @@ specialcases(U::Union) =
     destructure_union(U) .|>
     specialcases |>
     collect ∘ Iterators.flatten
+
+## AbstractRange
+function generate(rng::AbstractRNG, ::Type{UnitRange{T}}, n::Int) where T
+    data = generate(rng, T, 2n) |> Fix2(Iterators.partition, 2)
+
+    map(data) do pair
+        x, y = first(pair), last(pair)
+        x <= y ? UnitRange(x, y) : UnitRange(y, x)
+    end
+end
+
+specialcases(::Type{UnitRange{T}}) where T =
+    UnitRange{T}[UnitRange(one(T), zero(T))]
+

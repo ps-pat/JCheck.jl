@@ -73,6 +73,13 @@ function shrink(x::AbstractArray{T, N}) where {T, N}
     shrink_array_loop!(ret, x, ns, dims...)
 end
 
+function shrink(x::Union{OrdinalRange, LinRange})
+    shrinkable(x) || return [x]
+
+    n = div(length(x), 2, RoundUp)
+    [x[1:n], x[(n+1):end]]
+end
+
 function shrink(x::AbstractString)
     shrinkable(x) || return typeof(x)[x]
 
