@@ -80,6 +80,9 @@ function shrink(x::AbstractString)
     [x[1:n], x[range(n + 1, end)]]
 end
 
+shrink(x::Diagonal) =
+    shrinkable(x) ? Diagonal.(shrink(x.diag)) : Diagonal[x]
+
 """
     shrinkable(x)
 

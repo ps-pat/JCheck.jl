@@ -11,12 +11,16 @@ reduce_length(x) = all(<=(length(x)), length.(shrink(x)))
     @add_predicate(qc,
                    "Reduce matrix length",
                    M::Matrix{Int} -> reduce_length(M))
+    @add_predicate(qc,
+                   "Reduce diagonal matrix length",
+                   DM::Diagonal{Int} -> reduce_length(DM))
 
     ## `AbstractArray`.
     vec = collect(1:5)
     mat = vcat(vec * vec', vec * vec', vec * vec')
     arr3 = reshape(range(1, 5 * 6 * 7), 5, 6, 7)
     arr4 = reshape(range(1, 5 * 2 * 3 * 4), 5, 2, 3, 4)
+    dm = Diagonal(1:5)
 
     @test shrink(vec) == [collect(1:3), collect(4:5)]
     @test shrink(mat) ==
@@ -65,6 +69,8 @@ reduce_length(x) = all(<=(length(x)), length.(shrink(x)))
          [84; 85;;;; 114; 115],
          [86; 87; 88;;;; 116; 117; 118],
          [89; 90;;;; 119; 120]]
+
+    @test shrink(dm) == [Diagonal(1:3), Diagonal(4:5)]
 
     ## `AbstractString`.
     s = "C'est pas de nos affaires, nous on est Iroquois."
