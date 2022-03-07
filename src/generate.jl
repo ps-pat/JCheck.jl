@@ -252,14 +252,7 @@ end
 
 IndexStyle(::Type{<:SquareMatrix}) = IndexLinear()
 
-for func ∈ [:eltype,
-            :length,
-            :ndims,
-            :size,
-            :axes,
-            :eachindex,
-            :stride,
-            :getindex]
+for func ∈ [:eltype, :size, :getindex]
     @eval $func(M::SquareMatrix, args...) = $func(M.mat, args...)
 end
 
