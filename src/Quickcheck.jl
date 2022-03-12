@@ -10,6 +10,8 @@ import JLSO
 
 import Dates
 
+using Memoization: @memoize
+
 include("InternalTestSet.jl")
 
 ArgsDict = Dict{Symbol, Vector}
@@ -227,9 +229,9 @@ function Base.show(io::IO, qc::Quickcheck)
     print(io, header, "\n", join(vars, "\n"))
 end
 
-function evaluate_shrink(predicate::Function,
-                         valuation::Tuple,
-                         depth::Int)
+@memoize function evaluate_shrink(predicate::Function,
+                                  valuation::Tuple,
+                                  depth::Int)
     ## If `valuation` satisfies `predicate`, an empty tuple is returned.
     predicate(valuation...) && return (nothing, zero(Int))
 
