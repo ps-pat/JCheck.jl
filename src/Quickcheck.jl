@@ -233,7 +233,7 @@ end
                                   valuation::Tuple,
                                   depth::Int)
     ## If `valuation` satisfies `predicate`, an empty tuple is returned.
-    predicate(valuation...) && return (nothing, zero(Int))
+    predicate(valuation...) && return valuation, zero(Int)
 
     ## Verify if at least one entry of valuation is shrinkable. If
     ## that's not the case, just return it.
@@ -244,15 +244,21 @@ end
         Fix1(Iterators.map, shrink) |>
         splat(Iterators.product)
 
-    res = mapreduce(v -> evaluate_shrink(predicate, v, depth + 1),
-                    (x, y) -> last(x) >= last(y) ? x : y,
-                    candidates)
+    best_candidate, candidates = Iterators.peel(candidates)
+    shrunk_best_candidates = evaluate_shrink(predicate, best_candidate, depth + 1)
+    for candidate ∈ candidates
+        shrunk_candidate = evaluate_shrink(predicate, candidate, depth + 1)
+
+        if last(shrunk_candidate) > last(shrunk_best_candidates)
+            shrunk_best_candidates = shrunk_candidate
+        end
+    end
 
     ## If no candidate falsifies the predicate, just return the
     ## original valuation.
-    isnothing(first(res)) && return valuation, depth
+    iszero(last(shrunk_best_candidates)) && return valuation, depth
 
-    res
+    shrunk_best_candidates
 end
 
 evaluate_shrink(predicate::Function, valuation::Tuple) =
