@@ -5,8 +5,8 @@
 # JCheck
 *Randomized Property Based Testing for Julia*
 
-Usable, but still a work in progress. Please have a look at the
-[documentation](https://patrickfournier.ca/JCheck.jl/dev/)
+**<p align="center">:construction: Usable, but still a work in progress :construction:</p>**
+Please have a look at the [documentation](https://patrickfournier.ca/JCheck.jl/dev/).
 
 ## TODO
 - [ ] Better documentation
