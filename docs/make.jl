@@ -17,4 +17,6 @@ makedocs(sitename="JCheck.jl",
 deploydocs(repo = "github.com/ps-pat/JCheck.jl.git",
            devbranch = "main")
 
-Documenter.HTML(assets = ["assets/favicon.ico"])
+Documenter.HTML(assets = [asset("assets/logo.svg",
+                                class = :ico,
+                                islocal = true)])
