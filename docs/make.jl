@@ -16,3 +16,5 @@ makedocs(sitename="JCheck.jl",
 
 deploydocs(repo = "github.com/ps-pat/JCheck.jl.git",
            devbranch = "main")
+
+Documenter.HTML(assets = ["assets/favicon.ico"])
