@@ -16,7 +16,7 @@ no further shrinkage is possible.
 
 # Implementation
 - Any implementation of `shrink(x::T)` must come with an implementation of
-  [`shrinkable(x::T)`](@ref shrink(Any)). Failure to do so will prevent
+  [`shrinkable(x::T)`](@ref shrinkable(Any)). Failure to do so will prevent
   [`@quickcheck`](@ref) from calling `shrink` on an object of type `T`.
 - `shrink(x)` must return [x] if `shrinkable(x)` evaluate to `false`. We
   suggest that the first line of your method is something like:
