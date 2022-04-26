@@ -244,6 +244,8 @@ end
         Fix1(Iterators.map, shrink) |>
         splat(Iterators.product)
 
+    isempty(candidates) && return valuation, depth
+
     best_candidate, candidates = Iterators.peel(candidates)
     shrunk_best_candidates = evaluate_shrink(predicate, best_candidate, depth + 1)
     for candidate ∈ candidates
