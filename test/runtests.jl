@@ -3,6 +3,10 @@
 using JCheck
 using Test
 
+import Aqua
+
+Aqua.test_all(JCheck, ambiguities = false)
+
 include("types_with_generate.jl")
 
 @time begin

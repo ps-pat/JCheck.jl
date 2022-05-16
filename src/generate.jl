@@ -240,7 +240,7 @@ function generate(rng::AbstractRNG, ::Type{BitArray{N}}, n::Int) where N
 end
 
 @generated function specialcases(::Type{DT}) where DT <:
-    Union{Array{T, N}, BitArray{N}} where {T, N}
+    Union{Array{<:Any, N}, BitArray{N}} where N
 
     DT[DT(undef, [zero(Int) for _ ∈ 1:N]...)]
 end
