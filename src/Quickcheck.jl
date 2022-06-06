@@ -297,7 +297,12 @@ function quickcheck(qc::Quickcheck, file_id::AbstractString)
         for valuation ∈ Iterators.flatten((specialcases_itr,
                                            randomcases_itr))
             if !pred(valuation...)
-                valuation = evaluate_shrink(pred, valuation)
+                try
+                    valuation = evaluate_shrink(pred, valuation)
+                catch e
+                    @warn "Could not shrink valuation, got the following error \
+                           $e"
+                end
 
                 ex = Expr(:tuple,
                           (Expr(:(=), arg, val)
