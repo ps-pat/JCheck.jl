@@ -232,10 +232,10 @@ end
 @memoize function evaluate_shrink(predicate::Function,
                                   valuation::Tuple,
                                   depth::Int)
-    ## If `valuation` satisfies `predicate`, an empty tuple is returned.
+    ## If `valuation` satisfies `predicate`, return it with depth 0.
     predicate(valuation...) && return valuation, zero(Int)
 
-    ## Verify if at least one entry of valuation is shrinkable. If
+    ## Verify that at least one entry of valuation is shrinkable. If
     ## that's not the case, just return it.
     any(shrinkable, valuation) || return valuation, depth
 
@@ -300,8 +300,8 @@ function quickcheck(qc::Quickcheck, file_id::AbstractString)
                 try
                     valuation = evaluate_shrink(pred, valuation)
                 catch e
-                    @warn "Could not shrink valuation, got the following error \
-                           $e"
+                    @warn "Could not shrink valuation, got the following \
+                           error: $e"
                 end
 
                 ex = Expr(:tuple,
