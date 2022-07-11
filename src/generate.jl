@@ -56,10 +56,10 @@ Sample `n` random instances of type `T`.
 - `Char`
 - `Array{T, N}`
 - `BitArray{N}`
-- `SquareMatrix{T}` exists`.
+- `SquareMatrix{T}`.
 - Any [special matrix](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#Special-matrices) implemented by Julia's LinearAlgebra module.
 - `Union{T...}`
-- `UnitRange{T}`
+- `UnitRange{T}`, `StepRange{T, T}`
 
 In the previous list, `T` represent any type for which a `generate`
 method is implemented.
@@ -416,3 +416,18 @@ end
 specialcases(::Type{UnitRange{T}}) where T =
     UnitRange{T}[UnitRange(one(T), zero(T))]
 
+function generate(rng::AbstractRNG,
+                  ::Type{StepRange{T, S}},
+                  n::Int) where {T, S}
+    lbounds = generate(rng, T, n)
+
+    spacings = rand(rng, setdiff(range(convert(S, -100), length = 200), 0), n)
+
+    lens = abs.(rand(rng, Int16, n))
+    ubounds = lbounds .+ lens .* spacings .|> Fix1(convert, T)
+
+    map(StepRange, lbounds, spacings, ubounds)
+end
+
+specialcases(::Type{StepRange{T, S}}) where {T, S} =
+    StepRange{T, S}[StepRange(one(T), one(S), zero(T))]
