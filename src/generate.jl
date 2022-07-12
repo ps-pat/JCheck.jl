@@ -1,7 +1,6 @@
 using Random:
     AbstractRNG,
     GLOBAL_RNG,
-    bitrand,
     randexp,
     randstring,
     bitrand,
@@ -22,19 +21,7 @@ import Base:
     IndexStyle,
     getindex
 
-using LinearAlgebra:
-    Symmetric,
-    Hermitian,
-    UpperTriangular,
-    UnitUpperTriangular,
-    LowerTriangular,
-    UnitLowerTriangular,
-    UpperHessenberg,
-    Tridiagonal,
-    SymTridiagonal,
-    Bidiagonal,
-    Diagonal,
-    UniformScaling
+include("generate_LinearAlgebra.jl")
 
 """
     generate([rng=GLOBAL_RNG], T, n)
@@ -243,117 +230,6 @@ end
     Union{Array{<:Any, N}, BitArray{N}} where N
 
     DT[DT(undef, [zero(Int) for _ ∈ 1:N]...)]
-end
-
-## Special Matrices
-
-struct SquareMatrix{T} <: DenseMatrix{T}
-    mat::Matrix{T}
-end
-
-IndexStyle(::Type{<:SquareMatrix}) = IndexLinear()
-
-for func ∈ [:eltype, :size, :getindex]
-    @eval $func(M::SquareMatrix, args...) = $func(M.mat, args...)
-end
-
-function generate(rng::AbstractRNG, ::Type{SquareMatrix{T}}, n::Int) where T
-    sizes = randlen(rng, 12, n)
-
-    SquareMatrix{T}[SquareMatrix{T}(reshape(generate(rng, T, σ^2), σ, σ))
-                    for σ ∈ sizes]
-end
-
-@generated specialcases(::Type{SquareMatrix{T}}) where T =
-    SquareMatrix{T}.(specialcases(Matrix{T}))
-
-generate(rng::AbstractRNG, ::Type{Diagonal{T, S}}, n::Int) where {T, S} =
-    randlen(rng, 12, n) .|> Fix1(generate, T) .|> Diagonal
-
-generate(rng::AbstractRNG, ::Type{Bidiagonal{T, S}}, n::Int) where {T, S} =
-    map(zip(randlen(rng, 12, n), bitrand(rng, n))) do (σ, uplo)
-        ul = uplo ? :U : :L
-        data = generate(rng, T, 2σ - 1)
-        Bidiagonal(data[1:σ], data[range(σ + 1, 2σ - 1)], ul)
-    end
-
-generate(rng::AbstractRNG, ::Type{Tridiagonal{T, S}}, n::Int) where {T, S} =
-    map(randlen(rng, 12, n)) do σ
-        data = generate(rng, T, 3σ - 2)
-        Tridiagonal(data[range(1, σ - 1)],
-                    data[range(σ, 2σ - 1)],
-                    data[range(2σ, 3σ - 2)])
-    end
-
-generate(rng::AbstractRNG,
-         ::Type{SymTridiagonal{T, S}},
-         n::Int) where {T, S} =
-    map(randlen(rng, 12, n)) do σ
-        data = generate(rng, T, 2σ - 1)
-        SymTridiagonal(data[1:σ], data[range(σ + 1, 2σ - 1)])
-    end
-
-generate(rng::AbstractRNG, ::Type{UniformScaling{T}}, n::Int) where T =
-    UniformScaling.(generate(rng, T, n))
-
-for (type, args) ∈ Dict(:Diagonal => ([],),
-                        :Bidiagonal => ([], [], :U),
-                        :Tridiagonal => ([], [], []),
-                        :SymTridiagonal => ([], []))
-    @eval begin
-        @generated specialcases(::Type{$type{T, S}}) where {T, S} =
-            $type{T, S}[$type{T, S}($args...)]
-    end
-end
-
-@generated specialcases(::Type{UniformScaling{T}}) where T =
-    UniformScaling{T}[UniformScaling{T}(0)]
-
-for type ∈ [:Symmetric, :Hermitian]
-    @eval begin
-        generate(rng::AbstractRNG,
-                 ::Type{$type{T, S}},
-                 n::Int) where {T, S} =
-                     map((M, uplo) -> $type(M, uplo ? :U : :L),
-                         generate(rng, SquareMatrix{T}, n), bitrand(rng, n))
-
-        @generated specialcases(::Type{$type{T, S}}) where {T, S} =
-            $type.(specialcases(S))
-    end
-end
-
-for (type, mat) ∈ Dict(:UpperTriangular => :SquareMatrix,
-                       :UnitUpperTriangular => :SquareMatrix,
-                       :LowerTriangular => :SquareMatrix,
-                       :UnitLowerTriangular => :SquareMatrix,
-                       :UpperHessenberg => :Matrix)
-    @eval begin
-        generate(rng::AbstractRNG,
-                 ::Type{$type{T, S}},
-                 n::Int) where {T, S} =
-                     $type{T}.(generate(rng, S, n))
-
-        @generated specialcases(::Type{$type{T, S}}) where {T, S} =
-            $type{T, S}.(specialcases(S))
-    end
-end
-
-for (type, mat) ∈ Dict(:UpperTriangular => :SquareMatrix,
-                       :UnitUpperTriangular => :SquareMatrix,
-                       :LowerTriangular => :SquareMatrix,
-                       :UnitLowerTriangular => :SquareMatrix,
-                       :UpperHessenberg => :Matrix,
-                       :Diagonal => :Vector,
-                       :Bidiagonal => :Vector,
-                       :Tridiagonal => :Vector,
-                       :SymTridiagonal => :Vector)
-    @eval begin
-        generate(rng::AbstractRNG, ::Type{$type{T}}, n::Int) where T =
-            generate(rng, $type{T, $mat{T}}, n)
-
-        @generated specialcases(::Type{$type{T}}) where T =
-            specialcases($type{T, $mat{T}})
-    end
 end
 
 ## Union Type
