@@ -48,4 +48,6 @@ types_with_generate = [Bool,
                              Vector{Float64}, Matrix{Int},
                              Array{Float32, 3}, BitVector, BitMatrix,
                              BitArray{5}, SquareMatrix{Float64},
-                             Symmetric{Float64, SquareMatrix{Float64}}}]
+                             Symmetric{Float64, SquareMatrix{Float64}}},
+                       UnitRange{Float64},
+                       StepRange{Int, Int}]

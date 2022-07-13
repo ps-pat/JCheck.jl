@@ -5,6 +5,8 @@ include("generate.jl")
 export generate
 export specialcases
 
+include("LinearAlgebra.jl")
+
 export SquareMatrix
 
 include("Quickcheck.jl")

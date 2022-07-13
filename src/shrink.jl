@@ -66,7 +66,7 @@ function shrink(x::AbstractArray{T, N}) where {T, N}
         Iterators.flatten |>
         Fix2(Iterators.partition, N) .|>
         NTuple{N, Int}
-    ret = [similar(x, eltype(x), dim) for dim ∈ ret_dims]
+    ret = [similar(x, dim) for dim ∈ ret_dims]
 
     ## Doing the heavy lifting in a separate function leads to huge
     ## improvements in terms of speed and memory usage.
@@ -86,9 +86,6 @@ function shrink(x::AbstractString)
     n = length(x) ÷ 2
     [x[1:n], x[range(n + 1, end)]]
 end
-
-shrink(x::Diagonal) =
-    shrinkable(x) ? Diagonal.(shrink(x.diag)) : Diagonal[x]
 
 """
     shrinkable(x)

@@ -21,8 +21,6 @@ import Base:
     IndexStyle,
     getindex
 
-include("generate_LinearAlgebra.jl")
-
 """
     generate([rng=GLOBAL_RNG], T, n)
 
