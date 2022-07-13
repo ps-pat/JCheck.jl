@@ -14,5 +14,6 @@ include("types_with_generate.jl")
         include("Quickcheck.jl")
         include("shrink.jl")
         include("generate.jl")
+        include("LinearAlgebra.jl")
     end
 end
