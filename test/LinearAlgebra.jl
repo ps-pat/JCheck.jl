@@ -32,7 +32,6 @@ reduce_length(x) = all(<=(length(x)), length.(shrink(x)))
                            $varname::$type{Int} -> reduce_length($varname))
         end
     end
-
     
     @quickcheck qc
 end
