@@ -136,23 +136,32 @@ specialcases(type::TrigOrHess{T, S}) where {T, S <: AbstractMatrix{T}} =
 
 ## Ugly hack to simplify common usage.
 ## TODO: Doesn't work for `Symmetric` & `Hermitian`.
-for (type, mat) ∈ Dict(:UpperTriangular => :SquareMatrix,
-                       :UnitUpperTriangular => :SquareMatrix,
-                       :LowerTriangular => :SquareMatrix,
-                       :UnitLowerTriangular => :SquareMatrix,
-                       :UpperHessenberg => :Matrix,
-                       # :Symmetric => :SquareMatrix,
-                       # :Hermitian => :SquareMatrix,
-                       :Diagonal => :Vector,
-                       :Bidiagonal => :Vector,
-                       :Tridiagonal => :Vector,
-                       :SymTridiagonal => :Vector)
+for (type, mat) ∈ (:UpperTriangular => :SquareMatrix,
+                   :UnitUpperTriangular => :SquareMatrix,
+                   :LowerTriangular => :SquareMatrix,
+                   :UnitLowerTriangular => :SquareMatrix,
+                   :UpperHessenberg => :Matrix,
+                   :Diagonal => :Vector,
+                   :Bidiagonal => :Vector,
+                   :Tridiagonal => :Vector,
+                   :SymTridiagonal => :Vector)
     @eval begin
         generate(rng, ::Type{$type{T}}, n) where T =
             generate(rng, $type{T, $mat{T}}, n)
 
         @generated specialcases(::Type{$type{T}}) where T =
             specialcases($type{T, $mat{T}})
+    end
+end
+
+for type ∈ [:Symmetric, :Hermitian]
+    @eval begin
+        msg = "Not implemented for `" * string($type) * "{T}`; " *
+            "specify `" * string($type) * "{T, S}` instead"
+
+        generate(rng, ::Type{$type{T}}, n) where T = error(msg)
+
+        specialcases(::Type{$type{T}}) where T = error(msg)
     end
 end
 
