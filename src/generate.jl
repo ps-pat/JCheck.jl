@@ -28,9 +28,9 @@ Sample `n` random instances of type `T`.
 
 # Arguments
 
-- `rng::AbstractRNG`: random number generator to use.
-- `T::Type`: type of the instances.
-- `n::Int`: number of realizations to sample.
+- `rng::AbstractRNG`: random number generator to use
+- `T::Type`: type of the instances
+- `n::Int`: number of realizations to sample
 
 # Default generators
 `generate` methods for the following types are shipped with this package:
@@ -42,16 +42,16 @@ Sample `n` random instances of type `T`.
 - `Array{T, N}`
 - `BitArray{N}`
 - `SquareMatrix{T}`.
-- Any [special matrix](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#Special-matrices) implemented by Julia's LinearAlgebra module.
+- Any [special matrix](https://docs.julialang.org/en/v1/stdlib/LinearAlgebra/#Special-matrices) implemented by Julia's LinearAlgebra module
 - `Union{T...}`
 - `UnitRange{T}`, `StepRange{T, T}`
 
-In the previous list, `T` represent any type for which a `generate`
+In the previous list, `T` represents any type for which a `generate`
 method is implemented.
 
 # Special Matrices (LinearAlgebra)
 - Generators are implemented for `<...>Triangular{T}` as well as
-  `<...>Triangular{T, S}`. In the first case, `S` default to
+  `<...>Triangular{T, S}`. In the first case, `S` defaults to
   `SquareMatrix{T}`. The exact same thing is true for `UpperHessenberg`.
 - Same idea for `<...>diagonal{T, V}` with `V` defaulting to `Vector{T}`.
 - Generators are only implemented for `Symmetric{T, S}` and
@@ -74,10 +74,10 @@ If this is not appropriate for your needs, don't hesitate to reimplement
 
 # Implementation
 When implementing `generate` for your type `T` keep the following in mind:
-- Your method should return a `Vector{T}`
+- Your method should return a `Vector{T}`.
 - It is not necessary to write `generate(T, n)` or
   `generate([rng, ]Array{T, N}, n) where N`; this is handled automatically.
-  You only need to implement `generate(::AbstractRNG, ::Type{T}, ::Int)`
+  You only need to implement `generate(::AbstractRNG, ::Type{T}, ::Int)`.
 - Consider implementing [`specialcases`](@ref) and [`shrink`](@ref) for
   `T` as well.
 
@@ -116,15 +116,15 @@ Non-random inputs that are always checked by [`@quickcheck`](@ref).
 
 # Arguments
 
-- `T::Type`: type of the inputs.
+- `T::Type`: type of the inputs
 
 # Implementation
 
-- Your method should return a `Vector{T}`
+- Your method should return a `Vector{T}`.
 - Useless without a [`generate`](@ref) method for `T`.
 - Be mindful of combinatoric explosion! [`@quickcheck`](@ref) generate an
   input for each element of the Cartesian product of the special cases of
-  every arguments of the predicates it is trying to falsify. Only include
+  every argument of the predicates it is trying to falsify. Only include
   special cases that are *truly* special.
 
 # Examples

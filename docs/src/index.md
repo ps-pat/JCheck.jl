@@ -6,31 +6,28 @@ CurrentModule = JCheck
 
 ## What is JCheck.jl?
 JCheck is a test framework for the [Julia programming
-language](https://julialang.org/). It aims imitating the one and only
-[Quickcheck](https://github.com/nick8325/quickcheck). The user
-specifies a set of properties in the form of predicates. JCheck then
-tries to falsifies these predicates. Since it is in general impossible
-to evaluate a predicate for every possible input, JCheck (as does
-QuickCheck) employs a Monte Carlo approach: it samples a set of inputs
-at random and pass them as arguments to the predicates. In order to
-make analysis of problematic cases more convenient, those can be
-serialized in a [JLSO](https://github.com/invenia/JLSO.jl) file for
-further experimentation.
+language](https://julialang.org/). It aims at imitating the one and only
+[Quickcheck](https://github.com/nick8325/quickcheck). The user specifies a set
+of properties in the form of predicates. JCheck then tries to falsify these
+predicates. Since it is in general impossible to evaluate a predicate for every
+possible input, JCheck (as does QuickCheck) employs a Monte Carlo approach: it
+samples a set of inputs at random and passes them as arguments to the
+predicates. To analyze problematic cases more conveniently, Serialization to a
+[JLSO](https://github.com/invenia/JLSO.jl) file is enabled by default.
 
 ## Features
 - Reuse inputs to cut into the time dedicated to cases generation.
 - Serialization of problematic cases for convenient analysis.
 - Integration with Julia's testing framework.
-- Allow specification of "special cases" i.e. non-random inputs that
-  are always checked.
+- Allow specification of "special cases" i.e. non-random inputs that are always
+  checked.
 - Shrinkage of failing test cases.
 
 ## Usage
 ### Container
-In order for them to be used in a test, predicates must be contained
-in a [`Quickcheck`](@ref) object. Those are fairly easy to create. The
-most basic way is to call the constructor with a short and simple
-description:
+Predicates must be contained in a [`Quickcheck`](@ref) object to be used in a
+test. Those are easy to create. The most basic way is to call the constructor
+with a short and simple description:
 
 ``` @setup example_index
 using Test:
@@ -49,7 +46,7 @@ Quickcheck(::AbstractString)) constructor.
 
 ### Adding predicates
 Once a [`Quickcheck`](@ref) object has been created, the next step is
-to populate it with predicates. This can be done with the
+to populate it with predicates. This can be done using the
 [`@add_predicate`](@ref) macro:
 
 ``` @example example_index
@@ -57,7 +54,7 @@ to populate it with predicates. This can be done with the
 ```
 
 A predicate is a function that returns either `true` or `false`. In
-the context of `JCheck` the form of the predicate is very strict;
+the context of `JCheck` the form of the predicate is strict;
 please read the documentation of [`@add_predicate`](@ref).
 
 ### (Quick)checking
@@ -125,11 +122,10 @@ analyzed.
 ft = JCheck.load("JCheck_test.jchk")
 ```
 
-Failing cases for a predicate can be extracted by using its
-description with [`@getcases`](@ref). There is no need to give the
-exact description of the predicate you want to extract; the entry with
-description closest to the one given (in the sense of the Levenshtein
-distance) will be matched.
+Failing cases for a predicate can be extracted using its description with
+[`@getcases`](@ref). There is no need to give the exact description of the
+predicate you want to extract; the entry which description is closest to the one
+given (in the sense of the Levenshtein distance) will be matched.
 
 ``` @example example_index
 pred, valuations = @getcases ft i od
@@ -143,9 +139,9 @@ For a list of types for which a generator is included in the package,
 see reference for [`generate`](@ref).
 
 ### Testing With Custom Types
-JCheck can easily be extended to work with custom type from which it
+JCheck can easily be extended to work with custom types from which it
 is possible to randomly sample instances. The only requirement is to
-overload [`generate`](@ref). For instance, an implementation for type
+overload [`generate`](@ref). For instance, an implementation for the type
 `Int64` could look like this:
 
 ``` @example example_index
@@ -156,7 +152,7 @@ generate(rng::AbstractRNG, ::Type{Int64}, n::Int) =
     rand(rng, Int64, n)
 ```
 
-Optionally, it is possible to specify so called "special cases" for a
+Optionally, it is possible to specify so-called "special cases" for a
 type. Those are always checked. Doing so is as easy as overloading
 [`specialcases`](@ref). For `Int`, this could look like this:
 
@@ -167,7 +163,7 @@ specialcases(::Type{Int64}) =
     Int64[0, 1, typemin(Int64), typemax(Int64)]
 ```
 
-For implementation details, see documentation of these two functions.
+For implementation details, see the documentation of these two functions.
 
 #### Shrinkage
 [`@quickcheck`](@ref) will try to shrink any failing test case if
@@ -177,7 +173,7 @@ two methods must be implemented:
 - [`shrink`](@ref)
 
 The first one is a predicate evaluating to `true` for an object if it
-can be shrinked. The second one is a function returning a `Vector` of
+can be shrinked. The second is a function returning a `Vector` of
 shrunk objects. The implementation for type `Abstractstring` is the
 following:
 

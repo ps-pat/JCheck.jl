@@ -21,16 +21,16 @@ PredsAssoc = Vector{NamedTuple{(:pred, :desc, :args),
 """
     Quickcheck
 
-Contain a set of property to check through the generation of random input.
+Contain a set of properties to check through the generation of random input.
 
 # Fields
 
-- `description::AbstractString`: description for the instance.
-- `rng::AbstractRNG`: PRNG used to generate inputs.
-- `predicates::PredsAssoc`: predicates to check.
-- `variables::ArgsDict`: Arguments used by the predicates.
-- `n::Int`: Number of random inputs to generate.
-- `serialize_fails::Bool`: If true, serialize failing inputs to a JLSO file.
+- `description::AbstractString`: description for the instance
+- `rng::AbstractRNG`: PRNG used to generate inputs
+- `predicates::PredsAssoc`: predicates to check
+- `variables::ArgsDict`: arguments used by the predicates
+- `n::Int`: number of random inputs to generate
+- `serialize_fails::Bool`: if true, serialize failing inputs to a JLSO file
 """
 struct Quickcheck
     description::AbstractString
@@ -58,10 +58,10 @@ Constructor for type [`Quickcheck`](@ref).
 
 # Arguments
 
-- `desc::AbstractString`: description for the instance.
-- `rng::AbstractRNG`: PRNG used to generate inputs.
-- `n::Int`: Number of random inputs to generate.
-- `serialize_fails::Bool`: If true, serialize failing inputs to a JLSO file.
+- `desc::AbstractString`: description for the instance
+- `rng::AbstractRNG`: PRNG used to generate inputs
+- `n::Int`: number of random inputs to generate
+- `serialize_fails::Bool`: if true, serialize failing inputs to a JLSO file
 
 # Examples
 ```jldoctest
@@ -118,9 +118,9 @@ Add the predicate `pred` to the set of tests `qc` with description `desc`.
 
 # Arguments
 
-- `qc`: Object of type [`Quickcheck`](@ref Quickcheck).
-- `desc`: String describing the predicate.
-- `pred`: Predicate in the form of an [anonymous function](https://docs.julialang.org/en/v1/manual/functions/#man-anonymous-functions).
+- `qc`: object of type [`Quickcheck`](@ref Quickcheck)
+- `desc`: string describing the predicate
+- `pred`: predicate in the form of an [anonymous function](https://docs.julialang.org/en/v1/manual/functions/#man-anonymous-functions)
 
 # Notes
 
