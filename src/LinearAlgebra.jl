@@ -125,7 +125,7 @@ function specialcases(type::SymOrHerm{T, S}) where {T, S <: AbstractMatrix{T}}
 end
 
 ## Triangular & Hessenberg matrices.
-const TrigOrHess = Union{<:Type{<:AbstractTriangular{T, S}},
+const TrigOrHess = Union{<:Type{<:AbstractTriangular{T}},
                          <:Type{UpperHessenberg{T, S}}} where {T, S}
 
 generate(rng, type::TrigOrHess{T, S}, n) where {T, S <: AbstractMatrix{T}} =
