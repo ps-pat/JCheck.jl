@@ -2,21 +2,35 @@ using JCheck
 
 using Documenter
 
-DocMeta.setdocmeta!(JCheck,
-                    :DocTestSetup,
-                    :(using JCheck),
-                    recursive = true,
-                    warn = false)
+using Git: git
 
-makedocs(sitename="JCheck.jl",
-         doctest = true,
-         modules = [JCheck],
-         pages = ["Home" => "index.md",
-                  "Reference" => "reference.md"])
+## Determine which version we are building documentation for
+current_version = try
+    gitout = (read ∘ git)(["describe", "--tags", "--abbrev=0", "--exact-match"])
+    version = mapreduce(Char, *, gitout[1:end - 1])
+    match(r"v[0-9]+\.[0-9]+\.[0-9]+", version).match
+catch
+    "dev"
+end
+@info "Building for version $current_version"
 
-deploydocs(repo = "github.com/ps-pat/JCheck.jl.git",
-           devbranch = "main")
+writter = Documenter.HTMLWriter.HTML(
+    canonical = "https://patrickfournier.ca/software/documentation/jcheck/stable",
+    edit_link = "master",
+    size_threshold_warn = 200 * 1024,
+    size_threshold = nothing
+)
 
-Documenter.HTML(assets = [asset("assets/logo.svg",
-                                class = :ico,
-                                islocal = true)])
+makedocs(
+    build="build/$current_version",
+    draft="draft" ∈ ARGS,
+    sitename="JCheck.jl",
+    format=Documenter.HTML(; collapselevel=1),
+    doctest=true,
+    repo=Remotes.GitHub("ps-pat", "JCheck.jl"),
+    modules=[JCheck],
+    pages=[
+        "Home" => "index.md",
+        "Reference" => "reference.md"
+    ]
+)
