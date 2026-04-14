@@ -2,6 +2,3 @@
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
 Git = "d7ba0133-e1db-5d97-8f8c-041e4b3a1eb2"
 JCheck = "852ab1b9-8b1f-4e09-8e6c-09fa7814d69a"
-
-[compat]
-Documenter = "0.27"
