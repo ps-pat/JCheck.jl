@@ -17,7 +17,7 @@ using StringDistances:
     FailedTests
 
 Container for failed tests from a [`@quickcheck`](@ref) run. Wrapper around
-a `Dict{Symbol, Any}` used for dispatch.
+a `Dict{Symbol, Any}`.
 """
 struct FailedTests <: AbstractDict{Symbol, Any}
     dict::Dict{Symbol, Any}
@@ -31,11 +31,11 @@ Load a collection of failed test cases serialized by a
  Argument `io` can be of type `IO`, `AbstractString` or `AbstractPath`.
 
 # Examples
-```jldoctest
+```jldoctest; setup = :(import JCheck)
 julia> ft = JCheck.load("JCheck_test.jchk")
 2 failing predicates:
-Product commute
 Is odd
+- commutes
 ```
 """
 load(io::Union{IO, AbstractString, AbstractPath}) =
@@ -67,17 +67,34 @@ the Levenshtein distance) will be returned; there is no need to pass the
 exact description.
 
 # Examples
-``` jldoctest
+```jldoctest; setup = :(using JCheck)
 julia> ft = JCheck.load("JCheck_test.jchk")
 2 failing predicates:
-Product commute
 Is odd
+- commutes
 
 julia> pred, valuations = @getcases ft iod
-NamedTuple{(:predicate, :valuations), Tuple{Function, Vector{Tuple}}}((Serialization.__deserialized_types__.var"#3#4"(), Tuple[(0,), (-9223372036854775808,), (6444904272543528628,)]))
+@NamedTuple{predicate::Function, valuations::Vector{Tuple}}((Serialization.__deserialized_types__.var"#11#12"(), Tuple[(0,), (-9223372036854775808,), (-1603514452799603314,), (1420394807175553538,), (4507329505808279390,), (-426481527288535688,), (-5691388592443778052,), (-7859122130299025792,), (-5525456812138927418,), (-7209867710197627164,)  …  (2031324158527932024,), (7907216074681153692,), (4734352501972781814,), (7649976476383282706,), (-6664068458754296008,), (-5721291110713069694,), (8573438617342549320,), (-5611383820228536680,), (-4303975626508744234,), (-5727584619371173840,)]))
 
 julia> map(x -> pred(x...), valuations)
-3-element Vector{Bool}:
+53-element Vector{Bool}:
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
+ ⋮
+ 0
+ 0
+ 0
+ 0
+ 0
+ 0
  0
  0
  0

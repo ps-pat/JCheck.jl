@@ -82,7 +82,7 @@ When implementing `generate` for your type `T` keep the following in mind:
   `T` as well.
 
 # Examples
-``` jldoctest
+```jldoctest; setup = :(using JCheck: generate)
 using Random: Xoshiro
 
 rng = Xoshiro(42)
@@ -128,7 +128,7 @@ Non-random inputs that are always checked by [`@quickcheck`](@ref).
   special cases that are *truly* special.
 
 # Examples
-``` jldoctest
+```jldoctest; setup = :(using JCheck: specialcases)
 julia> specialcases(Int)
 4-element Vector{Int64}:
                     0

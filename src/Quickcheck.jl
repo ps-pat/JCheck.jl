@@ -64,7 +64,7 @@ Constructor for type [`Quickcheck`](@ref).
 - `serialize_fails::Bool`: if true, serialize failing inputs to a JLSO file
 
 # Examples
-```jldoctest
+```jldoctest; setup = :(using JCheck: Quickcheck)
 julia> qc = Quickcheck("A Test")
 A Test: 0 predicate and 0 free variable.
 ```
@@ -136,7 +136,7 @@ The form of `pred` is very strict:
   must be given a distinct description.
 
 # Examples
-```jldoctest
+```jldoctest; setup = :(using JCheck: Quickcheck, @add_predicate)
 julia> qc = Quickcheck("A Test")
 A Test: 0 predicate and 0 free variable.
 
