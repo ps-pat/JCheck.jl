@@ -125,8 +125,13 @@ function specialcases(type::SymOrHerm{T, S}) where {T, S <: AbstractMatrix{T}}
 end
 
 ## Triangular & Hessenberg matrices.
-const TrigOrHess = Union{<:Type{<:AbstractTriangular{T}},
-                         <:Type{UpperHessenberg{T, S}}} where {T, S}
+const TrigOrHess = Union{
+    <:Type{UpperTriangular{T, S}},
+    <:Type{UnitUpperTriangular{T, S}},
+    <:Type{LowerTriangular{T, S}},
+    <:Type{UnitLowerTriangular{T, S}},
+    <:Type{UpperHessenberg{T, S}}
+} where {T,S}
 
 generate(rng, type::TrigOrHess{T, S}, n) where {T, S <: AbstractMatrix{T}} =
     map(type, generate(rng, S, n))
@@ -136,32 +141,27 @@ specialcases(type::TrigOrHess{T, S}) where {T, S <: AbstractMatrix{T}} =
 
 ## Ugly hack to simplify common usage.
 ## TODO: Doesn't work for `Symmetric` & `Hermitian`.
-for (type, mat) ∈ (:UpperTriangular => :SquareMatrix,
-                   :UnitUpperTriangular => :SquareMatrix,
-                   :LowerTriangular => :SquareMatrix,
-                   :UnitLowerTriangular => :SquareMatrix,
-                   :UpperHessenberg => :Matrix,
-                   :Diagonal => :Vector,
-                   :Bidiagonal => :Vector,
-                   :Tridiagonal => :Vector,
-                   :SymTridiagonal => :Vector)
-    @eval begin
-        generate(rng, ::Type{$type{T}}, n) where T =
-            generate(rng, $type{T, $mat{T}}, n)
+let type_mat = (
+        :Symmetric => :SquareMatrix,
+        :Hermitian => :SquareMatrix,
+        :UpperTriangular => :SquareMatrix,
+        :UnitUpperTriangular => :SquareMatrix,
+        :LowerTriangular => :SquareMatrix,
+        :UnitLowerTriangular => :SquareMatrix,
+        :UpperHessenberg => :Matrix,
+        :Diagonal => :Vector,
+        :Bidiagonal => :Vector,
+        :Tridiagonal => :Vector,
+        :SymTridiagonal => :Vector
+    )
+    for (type, mat) ∈ type_mat
+        @eval begin
+            generate(rng, ::Type{$type{T}}, n) where {T} =
+                generate(rng, $type{T,$mat{T}}, n)
 
-        @generated specialcases(::Type{$type{T}}) where T =
-            specialcases($type{T, $mat{T}})
-    end
-end
-
-for type ∈ [:Symmetric, :Hermitian]
-    @eval begin
-        msg = "Not implemented for `" * string($type) * "{T}`; " *
-            "specify `" * string($type) * "{T, S}` instead"
-
-        generate(rng, ::Type{$type{T}}, n) where T = error(msg)
-
-        specialcases(::Type{$type{T}}) where T = error(msg)
+            @generated specialcases(::Type{$type{T}}) where {T} =
+                specialcases($type{T,$mat{T}})
+        end
     end
 end
 
