@@ -5,7 +5,7 @@ using Test
 
 import Aqua
 
-Aqua.test_all(JCheck, ambiguities = false)
+Aqua.test_all(JCheck)
 
 include("types_with_generate.jl")
 
