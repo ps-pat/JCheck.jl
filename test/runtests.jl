@@ -9,11 +9,9 @@ Aqua.test_all(JCheck)
 
 include("types_with_generate.jl")
 
-@time begin
-    @testset "JCheck's tests" begin
-        include("Quickcheck.jl")
-        include("shrink.jl")
-        include("generate.jl")
-        include("LinearAlgebra.jl")
-    end
+@testset "JCheck's tests" begin
+    include("Quickcheck.jl")
+    include("shrink.jl")
+    include("generate.jl")
+    include("LinearAlgebra.jl")
 end
