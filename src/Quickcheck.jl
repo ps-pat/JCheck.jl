@@ -12,8 +12,6 @@ import Dates
 
 using Memoization: @memoize
 
-include("InternalTestSet.jl")
-
 ArgsDict = Dict{Symbol, Vector}
 
 PredsAssoc = Vector{NamedTuple{(:pred, :desc, :args),
@@ -276,9 +274,7 @@ function quickcheck(qc::Quickcheck, file_id::AbstractString)
                         NamedTuple{(:predicate, :valuations),
                                    Tuple{Function, Vector{Tuple}}}}()
 
-    @testset InternalTestSet "Test $desc" for
-        (pred, desc, args) ∈ qc.predicates
-
+    @testset "Test $desc" for (pred, desc, args) ∈ qc.predicates
         ## Flip to `false` if predicate evaluates to `false` for any
         ## valuation.
         local holds = true
