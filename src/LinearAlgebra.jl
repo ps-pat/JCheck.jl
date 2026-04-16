@@ -204,7 +204,7 @@ function shrink(x::Tridiagonal)
     map(Tridiagonal, ldiags, diags, udiags)
 end
 
-shrinkable(x::UniformScaling) = false
+shrinkable(::UniformScaling) = false
 
 ## Symmetric and Hermitian matrices.
 

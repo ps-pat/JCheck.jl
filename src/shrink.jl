@@ -99,8 +99,8 @@ Shrinkage can easily be disabled for type `T` using overloading:
 
     shrinkable(::T) = false
 """
-shrinkable(x) = false # Fallback method
+shrinkable(::Any) = false # Fallback method
 
-shrinkable(x::AbstractArray) = all(>=(2), size(x))
+shrinkable(x::AbstractArray) = all(>=(2), size(x))::Bool
 
 shrinkable(x::AbstractString) = length(x) >= 2
