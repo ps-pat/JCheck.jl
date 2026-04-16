@@ -1,17 +1,10 @@
 import JLSO
 
-import Base:
-    iterate,
-    length,
-    eltype,
-    getindex,
-    show
+import Base: eltype, getindex, iterate, length, show
 
 using FilePathsBase: AbstractPath
 
-using StringDistances:
-    findnearest,
-    Levenshtein
+using StringDistances: Levenshtein, findnearest
 
 """
     FailedTests

@@ -1,27 +1,21 @@
 using Base: Fix2
 
-import Base:
-    similar,
-    eltype,
-    size,
-    getindex,
-    setindex!,
-    IndexStyle
+import Base: IndexStyle, eltype, getindex, setindex!, similar, size
 
 using LinearAlgebra:
     AbstractTriangular,
-    Symmetric,
-    Hermitian,
-    UpperTriangular,
-    UnitUpperTriangular,
-    LowerTriangular,
-    UnitLowerTriangular,
-    UpperHessenberg,
-    Tridiagonal,
-    SymTridiagonal,
     Bidiagonal,
     Diagonal,
-    UniformScaling
+    Hermitian,
+    LowerTriangular,
+    SymTridiagonal,
+    Symmetric,
+    Tridiagonal,
+    UniformScaling,
+    UnitLowerTriangular,
+    UnitUpperTriangular,
+    UpperHessenberg,
+    UpperTriangular
 
 ############################################################
 ### Square matrix type.

@@ -1,6 +1,4 @@
-using Base:
-    splat,
-    Fix2
+using Base: Fix2, splat
 
 export shrink
 """

@@ -1,25 +1,8 @@
-using Random:
-    AbstractRNG,
-    GLOBAL_RNG,
-    randexp,
-    randstring,
-    bitrand,
-    shuffle!
+using Random: AbstractRNG, GLOBAL_RNG, bitrand, randexp, randstring, shuffle!
 
-using Base:
-    Fix1,
-    IndexLinear
+using Base: Fix1, IndexLinear
 
-import Base:
-    eltype,
-    length,
-    ndims,
-    size,
-    axes,
-    eachindex,
-    stride,
-    IndexStyle,
-    getindex
+import Base: IndexStyle, eachindex, eltype, getindex, length, size
 
 export generate
 """

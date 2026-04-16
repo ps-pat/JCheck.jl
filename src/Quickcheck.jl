@@ -1,8 +1,6 @@
 using Random: AbstractRNG, GLOBAL_RNG
 
-using Base:
-    splat,
-    Fix1
+using Base: Fix1, splat
 
 using Test: @test, @testset
 
