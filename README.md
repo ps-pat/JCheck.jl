@@ -4,6 +4,8 @@
 
 # JCheck
 *Randomized Property Based Testing for Julia*
+> [!warning]
+> JCheck requires Julia 1.12.0 or later.
 
 Please have a look at the [documentation](https://patrickfournier.ca/JCheck.jl/dev/).
 
