@@ -6,29 +6,18 @@ ShareDefaultModule = true
 # JCheck.jl Documentation
 
 ## What is JCheck.jl?
-JCheck is a test framework for the [Julia programming
-language](https://julialang.org/). It aims at imitating the one and only
-[Quickcheck](https://github.com/nick8325/quickcheck). The user specifies a set
-of properties in the form of predicates. JCheck then tries to falsify these
-predicates. Since it is in general impossible to evaluate a predicate for every
-possible input, JCheck (as does QuickCheck) employs a Monte Carlo approach: it
-samples a set of inputs at random and passes them as arguments to the
-predicates. To analyze problematic cases more conveniently, Serialization to a
-[JLSO](https://github.com/invenia/JLSO.jl) file is enabled by default.
+JCheck is a test framework for the [Julia programming language](https://julialang.org/). It aims to replicate some of the functionalities of [Quickcheck](https://github.com/nick8325/quickcheck). The user specifies a set of properties as predicates, and JCheck then attempts to find cases that violate these predicates. Since it is generally impossible to evaluate a predicate for every possible input, JCheck, like QuickCheck, uses a Monte Carlo approach: it generates a set of random inputs and passes them as arguments to the predicates. Serialization to a [JLSO](https://github.com/invenia/JLSO.jl) file is enabled by default to facilitate analysis of problematic cases.
 
 ## Features
-- Reuse inputs to cut into the time dedicated to cases generation.
-- Serialization of problematic cases for convenient analysis.
+- Reuse inputs to reduce the time spent on case generation.
+- Serialization of problematic cases for easier analysis.
 - Integration with Julia's testing framework.
-- Allow specification of "special cases" i.e. non-random inputs that are always
-  checked.
+- Allow specification of "special cases," that is, non-random inputs that are always checked.
 - Shrinkage of failing test cases.
 
 ## Usage
 ### Container
-Predicates must be contained in a [`Quickcheck`](@ref) object to be used in a
-test. Those are easy to create. The most basic way is to call the constructor
-with a short and simple description:
+Predicates must be contained in a [`Quickcheck`](@ref) object to be used in a test. They are easy to create. The most basic way is to call the constructor with a brief and simple description:
 
 ```@repl
 using Test: @testset, @test
@@ -38,34 +27,26 @@ using JCheck
 qc = Quickcheck("A Test")
 ```
 
-For more advanced usages, see documentation of the [`Quickcheck`](@ref
-Quickcheck(::AbstractString)) constructor.
+For more advanced uses, see the documentation of the [`Quickcheck`](@ref Quickcheck(::AbstractString)) constructor.
 
 ### Adding predicates
-Once a [`Quickcheck`](@ref) object has been created, the next step is
-to populate it with predicates. This can be done using the
-[`@add_predicate`](@ref) macro:
+Once a [`Quickcheck`](@ref) object has been created, the next step is to populate it with predicates. This can be done using the [`@add_predicate`](@ref) macro.
 
 ```@repl
 @add_predicate qc "Sum commute" ((x::Float64, n::Int) -> x + n == n + x)
 ```
 
-A predicate is a function that returns either `true` or `false`. In
-the context of `JCheck` the form of the predicate is strict;
-please read the documentation of [`@add_predicate`](@ref).
+A predicate is a function that returns either `true` or `false`. In the context of `JCheck`, the form of the predicate is strict; please read the documentation of [`@add_predicate`](@ref).
 
 ### (Quick)checking
-The macro [`@quickcheck`](@ref) launches the process of looking for
-falsifying instances in a [`Quickcheck`](@ref) object.
+The macro [`@quickcheck`](@ref) initiates the process of searching for falsifying instances within a [`Quickcheck`](@ref) object.
 
 ```@repl
 @quickcheck qc
 ```
 
 #### As part of a [`@testset`](https://docs.julialang.org/en/v1/stdlib/Test/#Test.@testset)
-The [`@quickcheck`](@ref) macro can be nested inside
-[`@testset`](https://docs.julialang.org/en/v1/stdlib/Test/#Test.@testset).
-This allows easy integration to a package's set of tests.
+The [`@quickcheck`](@ref) macro can be nested within a [`@testset`](https://docs.julialang.org/en/v1/stdlib/Test/#Test.@testset). This facilitates integration into a package's test suite.
 
 ```@jldoctest; setup = :(using Test: @testset, @test; using JCheck: @quickcheck)
 @testset "Sample test set" begin
@@ -108,18 +89,13 @@ ERROR: Some tests did not pass: 2 passed, 1 failed, 0 errored, 0 broken.
 ```
 
 ### Analysing failing cases
-By default, failing test cases are serialized to a
-[JLSO](https://github.com/invenia/JLSO.jl) file so they can easily be
-analyzed.
+By default, failing test cases are serialized to a [JLSO](https://github.com/invenia/JLSO.jl) file for subsequent analysis.
 
 ```@repl
 ft = JCheck.load("JCheck_test.jchk")
 ```
 
-Failing cases for a predicate can be extracted using its description with
-[`@getcases`](@ref). There is no need to give the exact description of the
-predicate you want to extract; the entry which description is closest to the one
-given (in the sense of the Levenshtein distance) will be matched.
+Failing cases for a predicate can be extracted using its description with [`@getcases`](@ref). There's no need to provide the exact description of the predicate you want to extract; the entry whose description is closest (in terms of Levenshtein distance) will be matched.
 
 ```@repl
 pred, valuations = @getcases ft i od
@@ -128,14 +104,10 @@ map(x -> pred(x...), valuations) # each element of `valuations` is a tuple.
 ```
 
 ### Types with built-in generators
-For a list of types for which a generator is included in the package,
-see reference for [`generate`](@ref).
+For a list of types for which a generator is included in the package, see the reference for [`generate`](@ref).
 
 ### Testing With Custom Types
-JCheck can easily be extended to work with custom types from which it
-is possible to randomly sample instances. The only requirement is to
-overload [`generate`](@ref). For instance, an implementation for the type
-`Int64` could look like this:
+JCheck can be easily extended to work with custom types from which it is possible to randomly generate instances. The only requirement is to overload [`generate`](@ref). For example, an implementation for the type `Int64` could look like this:
 
 ```@repl
 using Random: AbstractRNG
@@ -143,27 +115,20 @@ using Random: AbstractRNG
 generate(rng::AbstractRNG, ::Type{Int64}, n::Int) = rand(rng, Int64, n)
 ```
 
-Optionally, it is possible to specify so-called "special cases" for a
-type. Those are always checked. Doing so is as easy as overloading
-[`specialcases`](@ref). For `Int`, this could look like this:
+Optionally, it is possible to specify so-called "special cases" for a type. These are always checked. Implementing them is as easy as overloading [`specialcases`](@ref). For `Int`, this could look like this:
 
 ```@repl
 specialcases(::Type{Int64}) = Int64[0, 1, typemin(Int64), typemax(Int64)]
 ```
 
-For implementation details, see the documentation of these two functions.
+For implementation details, refer to the documentation of these two functions.
 
 #### Shrinkage
-[`@quickcheck`](@ref) will try to shrink any failing test case if
-possible. In order to enable shrinkage for a given type, the following
-two methods must be implemented:
+`@quickcheck`](@ref) will attempt to shrink any failing test case if possible. In order to enable shrinkage for a given type, the following two methods must be implemented:
 - [`shrinkable`](@ref)
 - [`shrink`](@ref)
 
-The first one is a predicate evaluating to `true` for an object if it
-can be shrinked. The second is a function returning a `Vector` of
-shrunk objects. The implementation for type `Abstractstring` is the
-following:
+The first one is a predicate that evaluates to `true` for an object if it can be shrunk. The second is a function that returns a `Vector` of shrunk objects. The implementation for type `AbstractString` is as follows:
 
 ```@example
 shrinkable(x::AbstractString) = length(x) >= 2
@@ -176,5 +141,4 @@ function shrink(x::AbstractString)
 end
 ```
 
-For more details and a list of default shrinkers, see the
-documentation of these methods.
+For more details and a list of default shrinkers, see the documentation for these methods.
