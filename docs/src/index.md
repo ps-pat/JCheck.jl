@@ -1,5 +1,6 @@
 ```@meta
 CurrentModule = JCheck
+ShareDefaultModule = true
 ```
 
 # JCheck.jl Documentation
@@ -29,15 +30,11 @@ Predicates must be contained in a [`Quickcheck`](@ref) object to be used in a
 test. Those are easy to create. The most basic way is to call the constructor
 with a short and simple description:
 
-``` @setup example_index
-using Test:
-    @testset,
-    @test
+```@repl
+using Test: @testset, @test
 
 using JCheck
-```
 
-``` @example example_index
 qc = Quickcheck("A Test")
 ```
 
@@ -49,7 +46,7 @@ Once a [`Quickcheck`](@ref) object has been created, the next step is
 to populate it with predicates. This can be done using the
 [`@add_predicate`](@ref) macro:
 
-``` @example example_index
+```@repl
 @add_predicate qc "Sum commute" ((x::Float64, n::Int) -> x + n == n + x)
 ```
 
@@ -61,11 +58,8 @@ please read the documentation of [`@add_predicate`](@ref).
 The macro [`@quickcheck`](@ref) launches the process of looking for
 falsifying instances in a [`Quickcheck`](@ref) object.
 
-``` @jldoctest
+```@repl
 @quickcheck qc
-
-Test Summary:    | Pass  Total
-Test Sum commute |    1      1
 ```
 
 #### As part of a [`@testset`](https://docs.julialang.org/en/v1/stdlib/Test/#Test.@testset)
@@ -73,7 +67,7 @@ The [`@quickcheck`](@ref) macro can be nested inside
 [`@testset`](https://docs.julialang.org/en/v1/stdlib/Test/#Test.@testset).
 This allows easy integration to a package's set of tests.
 
-``` @jldoctest
+```@jldoctest; setup = :(using Test: @testset, @test; using JCheck: @quickcheck)
 @testset "Sample test set" begin
     @test isempty([])
 
@@ -86,7 +80,7 @@ Sample test set |    2      2
 
 Let's add a failing predicate.
 
-``` @jldoctest example_index
+```@jldoctest
 @add_predicate qc "I fail" (x::Float64 -> false)
 
 @testset "Sample failing test set" begin
@@ -118,7 +112,7 @@ By default, failing test cases are serialized to a
 [JLSO](https://github.com/invenia/JLSO.jl) file so they can easily be
 analyzed.
 
-``` @example example_index
+```@repl
 ft = JCheck.load("JCheck_test.jchk")
 ```
 
@@ -127,11 +121,10 @@ Failing cases for a predicate can be extracted using its description with
 predicate you want to extract; the entry which description is closest to the one
 given (in the sense of the Levenshtein distance) will be matched.
 
-``` @example example_index
+```@repl
 pred, valuations = @getcases ft i od
 
-## Each element of `valuations` is a tuple.
-map(x -> pred(x...), valuations)
+map(x -> pred(x...), valuations) # each element of `valuations` is a tuple.
 ```
 
 ### Types with built-in generators
@@ -144,23 +137,18 @@ is possible to randomly sample instances. The only requirement is to
 overload [`generate`](@ref). For instance, an implementation for the type
 `Int64` could look like this:
 
-``` @example example_index
-import JCheck: generate
+```@repl
 using Random: AbstractRNG
 
-generate(rng::AbstractRNG, ::Type{Int64}, n::Int) =
-    rand(rng, Int64, n)
+generate(rng::AbstractRNG, ::Type{Int64}, n::Int) = rand(rng, Int64, n)
 ```
 
 Optionally, it is possible to specify so-called "special cases" for a
 type. Those are always checked. Doing so is as easy as overloading
 [`specialcases`](@ref). For `Int`, this could look like this:
 
-``` @example
-import JCheck: specialcases
-
-specialcases(::Type{Int64}) =
-    Int64[0, 1, typemin(Int64), typemax(Int64)]
+```@repl
+specialcases(::Type{Int64}) = Int64[0, 1, typemin(Int64), typemax(Int64)]
 ```
 
 For implementation details, see the documentation of these two functions.
@@ -177,7 +165,7 @@ can be shrinked. The second is a function returning a `Vector` of
 shrunk objects. The implementation for type `Abstractstring` is the
 following:
 
-``` @example
+```@example
 shrinkable(x::AbstractString) = length(x) >= 2
 
 function shrink(x::AbstractString)
