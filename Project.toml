@@ -1,6 +1,6 @@
 name = "JCheck"
 uuid = "852ab1b9-8b1f-4e09-8e6c-09fa7814d69a"
-version = "1.1.0"
+version = "1.2.0"
 authors = ["Patrick Fournier <pf@patrickfournier.ca>"]
 
 [deps]
