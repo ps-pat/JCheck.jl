@@ -2,6 +2,7 @@ using Base:
     splat,
     Fix2
 
+export shrink
 """
     shrink(x)
 
@@ -89,6 +90,7 @@ function shrink(x::AbstractString)
     [x[1:n], x[range(n + 1, end)]]
 end
 
+export shrinkable
 """
     shrinkable(x)
 

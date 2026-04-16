@@ -27,6 +27,7 @@ using LinearAlgebra:
 ### Square matrix type.
 ############################################################
 
+export SquareMatrix
 struct SquareMatrix{T} <: DenseMatrix{T}
     mat::Matrix{T}
 end

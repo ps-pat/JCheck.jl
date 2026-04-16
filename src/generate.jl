@@ -21,6 +21,7 @@ import Base:
     IndexStyle,
     getindex
 
+export generate
 """
     generate([rng=GLOBAL_RNG], T, n)
 
@@ -109,6 +110,7 @@ function generate end
 ## If no random number generator is specified, use `GLOBAL_RNG`.
 generate(::Type{T}, n::Int) where T = generate(GLOBAL_RNG, T, n)
 
+export specialcases
 """
     specialcases(T)
 

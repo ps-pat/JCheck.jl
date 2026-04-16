@@ -16,6 +16,8 @@ ArgsDict = Dict{Symbol, Vector}
 
 PredsAssoc = Vector{NamedTuple{(:pred, :desc, :args),
                                Tuple{Function, String, Vector{Symbol}}}}
+
+export Quickcheck
 """
     Quickcheck
 
@@ -109,6 +111,7 @@ function add_predicate(qc::Quickcheck,
     qc
 end
 
+export @add_predicate
 """
     @add_predicate qc desc pred
 
@@ -362,6 +365,7 @@ function quickcheck(qc::Quickcheck, file_id::AbstractString)
     nothing
 end
 
+export @quickcheck
 """
     @quickcheck qc [file_id::AbstractString="yyyy-mm-dd_HH-MM-SS"]
 

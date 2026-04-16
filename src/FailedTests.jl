@@ -23,6 +23,7 @@ struct FailedTests <: AbstractDict{Symbol, Any}
     dict::Dict{Symbol, Any}
 end
 
+export load
 """
     load(io)
 
@@ -55,6 +56,7 @@ getindex(ft::FailedTests, key::Symbol) = getindex(ft.dict, key)
 getindex(ft::FailedTests, key::AbstractString) =
     getindex(ft.dict, Symbol(key))
 
+export @getcases
 """
     @getcases ft, desc...
 
